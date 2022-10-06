@@ -1,11 +1,13 @@
 const Admin = require("../models/admin.js")
+const Detection = require('../models/detection.js')
+const Notification = require('../models/notification.js')
 const bcrypt = require('bcryptjs');
+const Notifiers = require('../models/notifier.js')
 const jwt = require('jsonwebtoken')
 module.exports = {
 
     login: async (req, res) => {
 
-        console.log("inside login")
         const { email, password } = req.body;
         // const admin2 = new Admin({ email, password })
         // const s = await admin2.save()
@@ -37,7 +39,6 @@ module.exports = {
     changePassword: async (req, res) => {
 
         const { oldPassword, newPassword, cnfrmNewPassword } = req.body;
-        console.log(oldPassword + " " + newPassword + " " + cnfrmNewPassword)
         if (newPassword != cnfrmNewPassword) {
             return res.status(422).json({ message: "Password and confirm password does not matches" });
         }
@@ -63,19 +64,19 @@ module.exports = {
     },
 
     UpdateUser: async (req, res) => {
+        const { Company, UserName, email, FirstName, LastName, Address, City, Country, Phone, AboutMe } = req.body;
+        // const Company=req.body.Company;
 
-        const { Company, Username, Email, Firstname, Lastname, Address, City, Country, Phone, Aboutme } = req.body;
         const admin = await Admin.findOne();
         if (admin) {
             Admin.updateOne({ Email: admin.email }, {
-                Company: Company, UserName: Username, FirstName: Firstname, LastName: Lastname, Address: Address,
-                Country: Country, City: City, AboutMe: Aboutme,Phone:Phone
+                Company: Company, UserName: UserName, Email: email, FirstName: FirstName, LastName: LastName, Address: Address,
+                Country: Country, City: City, AboutMe: AboutMe, Phone: Phone
             }, { new: true }).
                 then((results) => {
                     if (results == null) {
                         throw new Error("not Found")
                     }
-                    console.log('Updated successfully')
                     return res.status(200).json({ message: "User Record Updated Successfully" });
                 }).catch((err) => {
                     console.log(err)
@@ -86,11 +87,176 @@ module.exports = {
 
     getAdmin: async (req, res) => {
         const admin = await Admin.findOne();
-        console.log('sdf')
         if (admin)
-            return res.send(admin);
+            return res.status(200).send(admin);
         else
             return res.status(422).json({ message: "User Not Found" });
-    }
+    },
+    Detection_: async (req, res) => {
 
+        const { Anomaly_Name } = req.body;
+
+        var Anomaly_ID = await Detection.count({})
+        Anomaly_ID = Anomaly_ID + 1;
+
+        // console.log(Detection.find().count()+1);
+        let date_time = new Date();
+
+        // get current date
+        // adjust 0 before single digit date
+        let date = ("0" + date_time.getDate()).slice(-2);
+
+        // get current month
+        let month = ("0" + (date_time.getMonth() + 1)).slice(-2);
+
+        // get current year
+        let year = date_time.getFullYear();
+
+        // get current hours
+        let hours = date_time.getHours();
+
+        // get current minutes
+        let minutes = date_time.getMinutes();
+
+        // get current seconds
+        let seconds = date_time.getSeconds();
+
+        // prints date in YYYY-MM-DD format
+
+        const Anomaly_Date = year + "-" + month + "-" + date;
+        const Anomaly_Time = hours + ":" + minutes;
+
+
+        const Detect = new Detection({ Anomaly_ID, Anomaly_Name, Anomaly_Date, Anomaly_Time })
+        const save = await Detect.save()
+        return res.status(201).send(save);
+
+    },
+    GetDetection: async (req, res) => {
+        let detection = await Detection.find();
+        if(detection){
+            return res.status(200).send(detection);
+        }
+        else{
+            res.status(404).send({ message: "Record Not Found" })
+        }
+    },
+    Notification_: async (req, res) => {
+
+        const { Notification_Name } = req.body;
+        const Notification_Receiver = 'Admin';
+        var Notification_ID = await Notification.count({})
+        Notification_ID = Notification_ID + 1;
+
+        // console.log(Detection.find().count()+1);
+        let date_time = new Date();
+
+        // get current date
+        // adjust 0 before single digit date
+        let date = ("0" + date_time.getDate()).slice(-2);
+
+        // get current month
+        let month = ("0" + (date_time.getMonth() + 1)).slice(-2);
+
+        // get current year
+        let year = date_time.getFullYear();
+
+        // get current hours
+        let hours = date_time.getHours();
+
+        // get current minutes
+        let minutes = date_time.getMinutes();
+
+        // get current seconds
+        let seconds = date_time.getSeconds();
+
+        // prints date in YYYY-MM-DD format
+
+        const Notification_Date = year + "-" + month + "-" + date;
+
+        let Notification_Time
+        if (hours <= 11)
+            Notification_Time = hours + ":" + minutes + "AM";
+        else
+            Notification_Time = hours + ":" + minutes + "PM";
+        const Notify = new Notification({ Notification_ID, Notification_Name, Notification_Receiver, Notification_Date, Notification_Time })
+        const save = await Notify.save()
+        return res.status(201).send(save);
+
+    },
+    GetNotification: async (req, res) => {
+        let notification = await Notification.find();
+        if (notification.length > 0)
+            res.status(200).send(notification)
+        else
+            res.status().send(404)
+    },
+    DeleteNotification: async (req, res) => {
+        const { d_id } = req.body;
+        try {
+            const data = await Notification.deleteOne({ _id: d_id });
+            if (data) {
+                return res.status(200).json({ message: "Record Deleted Successfully" });
+            }
+            else {
+                return res.status(422).json({ error: "Try Again" });
+            }
+        } catch (err) {
+            console.log(err);
+        }
+    },
+    DeleteDetection: async (req, res) => {
+
+        const { d_id } = req.body;
+        try {
+            const data = await Detection.deleteOne({ _id: d_id });
+            if (data) {
+                return res.status(200).json({ message: "Record Deleted" });
+            }
+            else {
+                return res.status(422).json({ error: "No Record" });
+
+            }
+        } catch (err) {
+            console.log(err);
+        }
+    },
+    AddNotifier: async (req, res) => {
+        const { FirstName, LastName, Phone, Email, UserName } = req.body;
+        const find = await Notifiers.findOne({ Email: Email });
+        if (find) {
+            return res.status(400).json({ message: 'Notifier already exist' });
+        }
+        if (!find) {
+            const notifier = new Notifiers({ Email, UserName, FirstName, LastName,Phone })
+            const save = await notifier.save()
+            return res.status(200).json({ message: "Notifier Added Successfully" });
+        }
+    },
+    GetNotifier:async(req,res)=>{
+        const find=await Notifiers.find();
+        if(find){
+            return res.status(200).send(find);
+        }
+        else{
+            res.status(404).send({ message: "Record Not Found" })
+        }
+    }
+    ,
+    DeleteNotifier:async (req, res) => {
+
+        const { d_id } = req.body;
+        try {
+            const data = await Notifiers.deleteOne({ _id: d_id });
+            if (data) {
+                return res.status(200).json({ message: "Record Deleted" });
+            }
+            else {
+                return res.status(422).json({ message: "Try Again" });
+
+            }
+        } catch (err) {
+            console.log(err);
+        }
+    },
 }

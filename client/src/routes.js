@@ -23,16 +23,17 @@ import Icons from "views/Icons.js";
 import Maps from "views/Maps.js";
 import Notifications from "views/Notifications.js";
 import Upgrade from "views/Upgrade.js";
+import Notifiers from "views/Notifier";
 
 const dashboardRoutes = [
-  {
-    upgrade: true,
-    path: "/upgrade",
-    name: "Upgrade to PRO",
-    icon: "nc-icon nc-alien-33",
-    component: Upgrade,
-    layout: "/admin"
-  },
+  // {
+  //   upgrade: true,
+  //   path: "/upgrade",
+  //   name: "Upgrade to PRO",
+  //   icon: "nc-icon nc-alien-33",
+  //   component: Upgrade,
+  //   layout: "/admin"
+  // },
   {
     path: "/dashboard",
     name: "Dashboard",
@@ -48,7 +49,7 @@ const dashboardRoutes = [
     layout: "/admin"
   },
   {
-    path: "/table",
+    path: "/detection",
     name: "Detection",
     icon: "nc-icon nc-notes",
     component: TableList,
@@ -69,10 +70,10 @@ const dashboardRoutes = [
     layout: "/admin"
   },
   {
-    path: "/maps",
-    name: "History",
+    path: "/notifiers",
+    name: "Notifiers",
     icon: "nc-icon nc-pin-3",
-    component: Maps,
+    component: Notifiers,
     layout: "/admin"
   },
   {

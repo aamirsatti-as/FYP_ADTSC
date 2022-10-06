@@ -1,4 +1,4 @@
-import React from "react";
+import React,{ createContext, useState,useEffect } from 'react';
 import ReactDOM from "react-dom/client";
 import { BrowserRouter, Route, Switch, Redirect } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -8,15 +8,24 @@ import "./assets/css/demo.css";
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import { Routes, Outlet } from 'react-router-dom';
 import AdminLayout from "layouts/Admin.js";
+import Dashboard from "views/Dashboard"
 import Login from "../src/pages/login/login";
 import UserProfile from "views/UserProfile.js";
 import TableList from "views/TableList";
 import ChangePassword from '../src/pages/changePassword/changePassword'
-import Notification from "pages/Notification/notification";
+import Notifications from 'views/Notifications';
 import Livefootage from "pages/liveFootage/livefootage";
-function app() {
+import Notifier from 'views/Notifier';
 
+export const UserContext = createContext();
+
+function app() {
+  const[user,setUser] = useState(true);
+
+  
     return (
+      <div>
+        <UserContext.Provider value={{user,setUser}}>
 
     <Routes>
 
@@ -40,17 +49,19 @@ function app() {
 
       <Route exact path="/" element={<Login/>}/>
       <Route path="/admin" element={<AdminLayout />}>
-        <Route path="dashboard" element={< h1>This is admins dashboard</h1>} />
+        <Route path="dashboard" element={<Dashboard/>} />
         <Route path="user" element={<UserProfile/>} />
-        <Route path="table" element={< h1>This is admins table</h1>} />
-        <Route path="typography" element={<TableList/>} />
+        <Route path="detection" element={<TableList/>} />
+        <Route path="typography" element={< h1>This is Typography</h1>} />
         <Route path="icons" element={<Livefootage/>} />
-        <Route path="maps" element={<h1>Maps Component</h1>} />
-        <Route path="notifications" element={<h1>Notification Component</h1>} />
+        <Route path="notifiers" element={<Notifier/>} />
+        <Route path="notifications" element={<Notifications/>} />
       </Route>
       <Route path="/changePassword" element={<ChangePassword/>}/>
-      <Route path="/notification" element={<Notification/>}/>
+      <Route path="/notification" element={<Notifications/>}/>
     </Routes>
+    </UserContext.Provider>
+      </div>
     
     )}
 

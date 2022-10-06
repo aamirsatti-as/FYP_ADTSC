@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import './Sidebar.css'
 import { useLocation, NavLink } from "react-router-dom";
 
 import { Nav } from "react-bootstrap";
@@ -32,7 +33,7 @@ function Sidebar({ color, image, routes }) {
             ADTSC
           </a>
         </div>
-        <Nav>
+        <Nav >
           {routes.map((prop, key) => {
             if (!prop.redirect)
               return (
@@ -50,7 +51,7 @@ function Sidebar({ color, image, routes }) {
                     activeClassName="active"
                   >
                     <i className={prop.icon} />
-                    <p>{prop.name}</p>
+                    <p id="navSidebar">{prop.name}</p>
                   </NavLink>
                 </li>
               );
