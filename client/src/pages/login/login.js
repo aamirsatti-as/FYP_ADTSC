@@ -2,7 +2,11 @@ import React, { useState,useEffect } from 'react'
 import './login.css';
 import { useNavigate } from "react-router-dom";
 import {useDispatch} from 'react-redux';
+import axios from 'axios';
 import { signin} from '../../actions/auth';
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 const login = () => {
     const initialState = { email: '', password: '' };
     const [formData, setFormData] = useState(initialState);
@@ -10,11 +14,22 @@ const login = () => {
 	const [isSubmit, setIsSubmit] = useState(false);
     const dispatch=useDispatch();
     const navigate = useNavigate();
-    const handleLogin = (e) => {
+    const handleLogin =async (e) => {
         e.preventDefault();
         console.log(formData)
-        setFormErrors(validate(formData));
-        setIsSubmit(true);	
+        const data = await axios.post('http://localhost:5000/login', formData).then((response)=>{
+            if (response.status==200) {
+                navigate('/admin/dashboard')
+            }
+           }).catch(function (error) {
+                if (error.response.status==422) {
+                    toast.error('Something Went wrong, Try Again');
+                    console.log(error)
+                    console.log(error.message)
+                }
+          
+           })
+
         // dispatch(signin(formData,navigate));
         // navigate('/admin')
     }
@@ -22,35 +37,9 @@ const login = () => {
     const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
 
-    useEffect(() => {
-		console.log(formErrors);
-		if (Object.keys(formErrors).length === 0 && isSubmit) {
-		  console.log(Object.keys(formErrors));
-          
-          navigate('/admin')
-		//   dispatch(changePassword(formData,navigate));
-		  
-		}
-		
-	  }, [formErrors]);
-
-	  const validate = (values) => {
-		const errors = {};
-        const regex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i;
-		if (!values.email) {
-		  errors.email = "Email is Required";
-		}
-        else if (!regex.test(values.email)) {
-            errors.email = "This is not a valid email format!";
-          }
-		if (!values.password) {
-		  errors.password = "Password is Required";
-		} 
-		return errors;
-	  };
-
-
+    
     return (
+        <>
         <div className="ftco-section">
             <div className="container">
                 <div className="row justify-content-center">
@@ -72,7 +61,7 @@ const login = () => {
                                         </p>
                                     </div>
                                 </div>
-                                <form action="#" className="signin-form">
+                                <form onSubmit={handleLogin}>
                                     <div className="form-group mb-3">
                                         <label className="label" >Email</label>
                                         <input type="text" name='email' className="form-control" placeholder="Email" required onChange={handleChange} />
@@ -84,7 +73,7 @@ const login = () => {
                                     </div>
                                     <p className="error">{formErrors.password}</p>
                                     <div className="form-group">
-                                        <button type="submit" className="form-control btn btn-primary rounded submit px-3" onClick={handleLogin}>Sign In</button>
+                                        <button type="submit" className="form-control btn btn-primary rounded submit px-3" >Sign In</button>
                                     </div>
                                     <div className="form-group d-md-flex">
                                         <div className="w-50 text-left">
@@ -100,6 +89,18 @@ const login = () => {
                 </div>
             </div>
         </div>
+        <ToastContainer
+          position="top-center"
+          autoClose={2000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+        />
+        </>
     )
 }
 

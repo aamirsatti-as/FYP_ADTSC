@@ -7,11 +7,15 @@ const jwt = require('jsonwebtoken')
 module.exports = {
 
     login: async (req, res) => {
-
+        console.log('inside')
         const { email, password } = req.body;
-        // const admin2 = new Admin({ email, password })
+        // const Company='ADTSC',UserName='Aamir123',FirstName='Aamir',LastName='Naseer',Address='Alipur Islamabad',Country='Pakistan',Phone='0341561132',City='Islamabad',AboutMe='Student';
+
+        // const admin2 = new Admin({ email, password,Company, UserName, FirstName, LastName, Address, City, Country, Phone, AboutMe })
+        // console.log('hi')
         // const s = await admin2.save()
         const find = await Admin.findOne({ email: email });
+        console.log('hi')
         if (find) {
             const isMatch = await bcrypt.compare(req.body.password, find.password);
             if (isMatch) {
@@ -44,7 +48,7 @@ module.exports = {
         }
         const admin = await Admin.findOne();
         const isPasswordCorrect = await bcrypt.compare(oldPassword, admin.password);
-        if (admin) {
+        if (isPasswordCorrect) {
             password1 = await bcrypt.hash(cnfrmNewPassword, 12);
             Admin.update({ email: admin.email }, { password: password1 }, { new: true }).
                 then((results) => {
@@ -55,11 +59,11 @@ module.exports = {
                     return res.json({ message: "Password Changed" });
                 }).catch((err) => {
                     console.log(err)
-                    // return res.json( {message:"Current Password is Not Correct"})
+                    return res.status(422).json({ message: "Something Went Wrong Try Again" })
                 })
         }
         else {
-            console.log("Incorrext")
+            return res.status(422).json({ message: "Incorrect Current Password" })
         }
     },
 
@@ -134,10 +138,10 @@ module.exports = {
     },
     GetDetection: async (req, res) => {
         let detection = await Detection.find();
-        if(detection){
+        if (detection) {
             return res.status(200).send(detection);
         }
-        else{
+        else {
             res.status(404).send({ message: "Record Not Found" })
         }
     },
@@ -228,22 +232,22 @@ module.exports = {
             return res.status(400).json({ message: 'Notifier already exist' });
         }
         if (!find) {
-            const notifier = new Notifiers({ Email, UserName, FirstName, LastName,Phone })
+            const notifier = new Notifiers({ Email, UserName, FirstName, LastName, Phone })
             const save = await notifier.save()
             return res.status(200).json({ message: "Notifier Added Successfully" });
         }
     },
-    GetNotifier:async(req,res)=>{
-        const find=await Notifiers.find();
-        if(find){
+    GetNotifier: async (req, res) => {
+        const find = await Notifiers.find();
+        if (find) {
             return res.status(200).send(find);
         }
-        else{
+        else {
             res.status(404).send({ message: "Record Not Found" })
         }
     }
     ,
-    DeleteNotifier:async (req, res) => {
+    DeleteNotifier: async (req, res) => {
 
         const { d_id } = req.body;
         try {
@@ -259,4 +263,69 @@ module.exports = {
             console.log(err);
         }
     },
+    GetAllRecords: async (req, res) => {
+        let TotalDetection = await Detection.count({})
+        let TotalNotifier = await Notifiers.count({})
+        let detection = await Detection.find();
+
+        let date_time = new Date();
+
+        let date = ("0" + date_time.getDate()).slice(-2);
+
+        let month = ("0" + (date_time.getMonth() + 1)).slice(-2);
+
+        let year = date_time.getFullYear();
+
+        let TotalDetectionLastDay = 0;
+        detection.map((response) => {
+            let split = response.Anomaly_Date.split('-')
+            let splitYear = split[0];
+            let splitMonth = split[1];
+            let splitDate = split[2];
+
+            if (year == splitYear) {
+                if (splitMonth == month) {
+                    if (splitDate == date) {
+                        TotalDetectionLastDay += 1;
+                    }
+                    if (date - parseInt(splitDate) == '1') {
+                        TotalDetectionLastDay += 1;
+                    }
+                }
+                if (month % 2 != 0) {
+                    if (splitMonth == '1' || splitMonth == '3' || splitMonth == ' 5' || splitMonth == '7') {
+                        if (splitDate == '31' && date == '1') {
+                            TotalDetectionLastDay += 1;
+                        }
+                    }
+                    if (splitMonth == '9' || splitMonth == '11' ) {
+                        if (splitDate == '30' && date == '1') {
+                                TotalDetectionLastDay += 1;
+                        }
+                    }
+                }
+                else if(month%2==0){
+                    if(splitMonth=='2'){
+                        if (splitDate == '29' && date == '1') {
+                            TotalDetectionLastDay += 1;
+                        }
+                        if (splitDate == '28' && date == '1') {
+                            TotalDetectionLastDay += 1;
+                        }
+                    }
+                    if (splitMonth == '4' || splitMonth == '6' ) {
+                        if (splitDate == '30' && date == '1') {
+                                TotalDetectionLastDay += 1;
+                        }
+                    }
+                    if (splitMonth == '8' || splitMonth == '10' ) {
+                        if (splitDate == '31' && date == '1') {
+                                TotalDetectionLastDay += 1;
+                        }
+                    }      
+                }
+            }
+            })
+        res.status(200).json({ TotalDetection, TotalNotifier, TotalDetectionLastDay })
+    }
 }

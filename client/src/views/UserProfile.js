@@ -22,11 +22,15 @@ function User() {
   const [result, setResult] = useState([]);
   const { user, setUser } = useContext(UserContext);
   var [check, setCheck] = useState(true);
-  // const initialState = 
   const [formData, setFormData] = useState();
   const [error, setError] = useState(false);
   const [userErr, setUserErr] = useState(false)
   const [phoneErr, setPhoneErr] = useState(false)
+  const [formErrors, setFormErrors] = useState({})
+  const [isSubmit, setIsSubmit] = useState(false);
+  const [data1, setData1] = useState('')
+
+
   const fetchData = async () => {
 
     let result = await fetch("http://localhost:5000/getAdmin");
@@ -40,17 +44,11 @@ function User() {
   }, []);
 
 
-
   const navigate = useNavigate();
   const handleChange = (e) => {
     const val = e.target.value;
     setFormData({ ...formData, [e.target.name]: e.target.value });
   }
-  const [formErrors, setFormErrors] = useState({});
-
-  const [isSubmit, setIsSubmit] = useState(false);
-  const [data1, setData1] = useState('')
-
 
   const handleEditProfile = async (e) => {
     e.preventDefault()
@@ -60,6 +58,23 @@ function User() {
     setFormData(result1);
     setUser(false)
   }
+
+  const handleReload =async()=>{
+    let result1 = await fetch("http://localhost:5000/getAdmin");
+    result1 = await result1.json();
+
+    setFormData(result1);
+    setUser(false)
+    setResult(result1)
+  }
+
+  if(!result.email && !user){
+    setUser(true)
+    // handleReload()
+    // console.log('asdf')
+    window.location.reload()
+  }
+
 
   const handleUpdateProfile = (e) => {
     e.preventDefault();
@@ -78,18 +93,18 @@ function User() {
       setPhoneErr(true)
       return
     }
-    const data = axios.post('http://localhost:5000/updateUser', formData).then((response)=>{
-      if (response.status==200) {
-          toast('User Profile Edited Successfully');
+    const data = axios.post('http://localhost:5000/updateUser', formData).then((response) => {
+      if (response.status == 200) {
+        toast('User Profile Edited Successfully');
       }
-     }).catch(function (error) {
-          if (error.response.status==422) {
-              toast.error('Something Went Wrong, Try Again!');
-              console.log(error)
-              console.log(error.message)
-          }
-    
-     })
+    }).catch(function (error) {
+      if (error.response.status == 422) {
+        toast.error('Something Went Wrong, Try Again!');
+        console.log(error)
+        console.log(error.message)
+      }
+
+    })
 
   }
   if (user) {
@@ -249,8 +264,8 @@ function User() {
                       variant="info"
                       onClick={handleEditProfile}
                       style={{
-                            float:'right'
-                        }}
+                        float: 'right'
+                      }}
                     >
                       Edit Profile
                     </Button>
@@ -276,14 +291,14 @@ function User() {
                       <img
                         alt="..."
                         className="avatar border-gray"
-                        src={require("assets/img/faces/face-3.jpg")}
+                        src={require("assets/img/faces/face-0.jpg")}
                       ></img>
-                      <h5 className="title">Mike Andrew</h5>
+                      <h5 className="title">{result.FirstName} {result.LastName}</h5>
                     </a>
-                    <p className="description">michael24</p>
+                    <p className="description">{result.UserName}</p>
                   </div>
                   <p className="description text-center">
-                    Student<br></br>
+                    {result.AboutMe}<br></br>
                   </p>
                 </Card.Body>
                 <hr></hr>
@@ -476,8 +491,8 @@ function User() {
                       variant="info"
                       onClick={handleUpdateProfile}
                       style={{
-                            float:'right'
-                        }}
+                        float: 'right'
+                      }}
                     >
                       Update Profile
                     </Button>
@@ -502,58 +517,33 @@ function User() {
                       <img
                         alt="..."
                         className="avatar border-gray"
-                        src={require("assets/img/faces/face-3.jpg")}
+                        src={require("assets/img/faces/face-0.jpg")}
                       ></img>
-                      <h5 className="title">Mike Andrew</h5>
+                      <h5 className="title">{result.FirstName} {result.LastName}</h5>
                     </a>
-                    <p className="description">michael24</p>
+                    <p className="description">{result.UserName}</p>
                   </div>
                   <p className="description text-center">
-                    Student<br></br>
+                    {result.AboutMe}<br></br>
                   </p>
                 </Card.Body>
                 <hr></hr>
-                {/* <div className="button-container mr-auto ml-auto">
-                <Button
-                  className="btn-simple btn-icon"
-                  href="#pablo"
-                  onClick={(e) => e.preventDefault()}
-                  variant="link"
-                >
-                  <i className="fab fa-facebook-square"></i>
-                </Button>
-                <Button
-                  className="btn-simple btn-icon"
-                  href="#pablo"
-                  onClick={(e) => e.preventDefault()}
-                  variant="link"
-                >
-                  <i className="fab fa-twitter"></i>
-                </Button>
-                <Button
-                  className="btn-simple btn-icon"
-                  href="#pablo"
-                  onClick={(e) => e.preventDefault()}
-                  variant="link"
-                >
-                  <i className="fab fa-google-plus-square"></i>
-                </Button>
-              </div> */}
+
               </Card>
             </Col>
           </Row>
         </Container>
         <ToastContainer
-        position="top-center"
-        autoClose={2000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-      />
+          position="top-center"
+          autoClose={2000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+        />
       </>
     );
   }

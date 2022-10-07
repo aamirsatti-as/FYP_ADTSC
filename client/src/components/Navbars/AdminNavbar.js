@@ -15,15 +15,20 @@
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
 */
-import React, { Component } from "react";
+import React, { Component,useState } from "react";
 import { useLocation,useNavigate } from "react-router-dom";
-import { Navbar, Container, Nav, Dropdown, Button } from "react-bootstrap";
-
+import { Navbar, Container, Nav, Dropdown, Button,Row,Col} from "react-bootstrap";
+import { Modal,ModalHeader,ModalBody } from "reactstrap";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import routes from "routes.js";
-
+import axios from "axios";
 function Header() {
   const location = useLocation();
   const navigate= useNavigate();
+  const [modal,setModal]=useState(false);
+  const initialState = { oldPassword: '', newPassword: '', cnfrmNewPassword: '' };
+	const [formData, setFormData] = useState(initialState);
   const mobileSidebarToggle = (e) => {
     e.preventDefault();
     document.documentElement.classList.toggle("nav-open");
@@ -36,6 +41,27 @@ function Header() {
     document.body.appendChild(node);
   };
 
+  const handlePassword = async(e) => {
+		e.preventDefault();
+		console.log(formData)
+
+    const data = await axios.put('http://localhost:5000/changePassword', formData).then((response)=>{
+            if (response.status==200) {
+                toast('Password Changed Successfully ')
+            }
+           }).catch(function (error) {
+                if (error.response.status==422) {
+                    toast.error('Something Went wrong, Try Again');
+                    console.log(error)
+                    console.log(error.message)
+                }
+           })
+	}
+
+  const handleChange = (e) => {
+		setFormData({ ...formData, [e.target.name]: e.target.value })
+	}
+
   const getBrandText = () => {
     for (let i = 0; i < routes.length; i++) {
       if (location.pathname.indexOf(routes[i].layout + routes[i].path) !== -1) {
@@ -45,6 +71,7 @@ function Header() {
     return "Brand";
   };
   return (
+    <>
     <Navbar bg="light" expand="lg">
       <Container fluid>
         <div className="d-flex justify-content-center align-items-center ml-2 ml-lg-0">
@@ -77,63 +104,20 @@ function Header() {
                 onClick={(e) => e.preventDefault()}
                 className="m-0"
               >
-                <i className="nc-icon nc-palette"></i>
                 <span className="d-lg-none ml-1">Dashboard</span>
               </Nav.Link>
             </Nav.Item>
-            <Dropdown as={Nav.Item}>
-              <Dropdown.Toggle
-                as={Nav.Link}
-                data-toggle="dropdown"
-                id="dropdown-67443507"
-                variant="default"
-                className="m-0"
-              >
-                <i className="nc-icon nc-planet"></i>
-                <span className="notification">5</span>
-                <span className="d-lg-none ml-1">Notification</span>
-              </Dropdown.Toggle>
-              <Dropdown.Menu>
-                <Dropdown.Item
-                  href="#pablo"
-                  onClick={(e) => e.preventDefault()}
-                >
-                  Notification 1
-                </Dropdown.Item>
-                <Dropdown.Item
-                  href="#pablo"
-                  onClick={(e) => e.preventDefault()}
-                >
-                  Notification 2
-                </Dropdown.Item>
-                <Dropdown.Item
-                  href="#pablo"
-                  onClick={(e) => e.preventDefault()}
-                >
-                  Notification 3
-                </Dropdown.Item>
-                <Dropdown.Item
-                  href="#pablo"
-                  onClick={(e) => e.preventDefault()}
-                >
-                  Notification 4
-                </Dropdown.Item>
-                <Dropdown.Item
-                  href="#pablo"
-                  onClick={(e) => e.preventDefault()}
-                >
-                  Another notification
-                </Dropdown.Item>
-              </Dropdown.Menu>
-            </Dropdown>
             <Nav.Item>
               <Nav.Link
-                className="m-0"
+                data-toggle="dropdown"
                 href="#pablo"
-                onClick={(e) => e.preventDefault()}
+                onClick={(e) =>{
+                   e.preventDefault()
+                navigate('/admin/notifications')
+                }}
+                className="m-0"
               >
-                <i className="nc-icon nc-zoom-split"></i>
-                <span className="d-lg-block"> Search</span>
+                <i className="nc-icon nc-palette"></i>
               </Nav.Link>
             </Nav.Item>
           </Nav>
@@ -142,7 +126,10 @@ function Header() {
               <Nav.Link
                 className="m-0"
                 href="#pablo"
-                onClick={(e) => e.preventDefault()}
+                onClick={(e) => {
+                  e.preventDefault()
+                  navigate('/admin/user')
+                }}
               >
                 <span className="no-icon">Account</span>
               </Nav.Link>
@@ -157,58 +144,133 @@ function Header() {
                 variant="default"
                 className="m-0"
               >
-                <span className="no-icon">Dropdown</span>
+                <span className="no-icon">Settings</span>
               </Dropdown.Toggle>
               <Dropdown.Menu aria-labelledby="navbarDropdownMenuLink">
                 <Dropdown.Item
-                  href="#pablo"
-                  onClick={(e) => e.preventDefault()}
+                  onClick={(e) => {
+                    e.preventDefault()
+                    setModal(true)
+                    // navigate('/changePassword')
+                    }}
                 >
-                  Action
+                  Change Password
                 </Dropdown.Item>
                 <Dropdown.Item
                   href="#pablo"
-                  onClick={(e) => e.preventDefault()}
+                  onClick={(e) => {
+                    e.preventDefault()
+                    navigate('/')
+                  }}
                 >
-                  Another action
-                </Dropdown.Item>
-                <Dropdown.Item
-                  href="#pablo"
-                  onClick={(e) => e.preventDefault()}
-                >
-                  Something
-                </Dropdown.Item>
-                <Dropdown.Item
-                  href="#pablo"
-                  onClick={(e) => e.preventDefault()}
-                >
-                  Something else here
-                </Dropdown.Item>
-                <div className="divider"></div>
-                <Dropdown.Item
-                  href="#pablo"
-                  onClick={(e) => e.preventDefault()}
-                >
-                  Separated link
+                  Logout
                 </Dropdown.Item>
               </Dropdown.Menu>
             </Dropdown>
-            <Nav.Item>
-              <Nav.Link
-                className="m-0"
-                href="#pablo"
-                onClick={(e) =>{
-                  e.preventDefault()
-                  navigate('/')
-                }}
-              >
-                <span className="no-icon">Log out</span>
-              </Nav.Link>
-            </Nav.Item>
           </Nav>
         </Navbar.Collapse>
       </Container>
     </Navbar>
+    <Modal
+    size="lg"
+    isOpen={modal}
+    toggle={()=>setModal(!modal)}>
+      <ModalHeader
+      toggle={()=>setModal(!modal)}>
+        
+      </ModalHeader>
+
+      <ModalBody>
+        <form onSubmit={handlePassword}> 
+          <Row>
+            <Col lg={12}>
+                  <div>
+                    <label htmlFor='oldPassword'>
+                      Old Password
+                    </label>
+                    <input
+                    type='text'
+                    className='form-control'
+                    placeholder='Enter Old Password'
+                    name='oldPassword'
+                    onChange={handleChange}
+                    required>
+                    
+
+                    </input>
+                  
+                  </div>
+            </Col>
+
+            <Col lg={12}>
+                  <div>
+                    <label htmlFor='newPassword'>
+                      New Password
+                    </label>
+                    <input
+                    type='text'
+                    className='form-control'
+                    placeholder='Enter New Password'
+                    name='newPassword'
+                    onChange={handleChange}
+                    required>
+                    
+
+                    </input>
+                  
+                  </div>
+            </Col>
+
+            <Col lg={12}>
+                  <div>
+                    <label htmlFor='cnfrmNewPassword'>
+                      Confirm New Password
+                    </label>
+                    <input
+                    type='text'
+                    className='form-control'
+                    placeholder='Enter Old Password'
+                    name='cnfrmNewPassword'
+                    required
+                    onChange={handleChange}>
+                    
+
+                    </input>
+                  
+                  </div>
+            </Col>
+            <input
+                style={{
+                    backgroundColor: '#1DC7EA',
+                    color: '#FFFFFF',
+                    opacity: 1,
+                    padding: '10px 20px',
+                    borderRadius: '0.25rem',
+                    margin: '10px',
+                    textAlign: 'center',
+                    border: '1px solid transparent',
+                    borderColor: '#17a2b8',
+                    float: 'right'
+                }}
+                type="submit"
+                value="Change Password"
+            />
+          </Row>
+        </form>
+      </ModalBody>
+    </Modal>
+    <ToastContainer
+          position="top-center"
+          autoClose={2000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+        />
+    </>
   );
 }
 

@@ -43,13 +43,6 @@ function Notifier() {
     const postNotifier = async (e) => {
         e.preventDefault()
         console.log(formData)
-    //     axios.delete("https://aa-cattle-farm.herokuapp.com/admin/product/"+ID).then((response)=>{
-    //  alert('Card Deleted Successfully')
-  
-    // }).catch((err)=>{
-    //  alert('Card Not deleted'+err)
-   
-    // })
         const data = await axios.post('http://localhost:5000/addNotifier', formData).then((response)=>{
             if (response.status==200) {
                 toast('Notifier Added Successfully');
@@ -91,7 +84,7 @@ function Notifier() {
         <>
             <Container fluid>
                 <Row>
-                    <Col md="8">
+                    <Col md="12">
                         <Card>
                             <Card.Header>
                                 <Card.Title as="h4">Add Notifier</Card.Title>
@@ -192,34 +185,7 @@ function Notifier() {
                             </Card.Body>
                         </Card>
                     </Col>
-                    <Col md="4">
-                        <Card className="card-user">
-                            <div className="card-image">
-                                <img
-                                    alt="..."
-                                    src={require("assets/img/photo-1431578500526-4d9613015464.jpeg")}
-                                ></img>
-                            </div>
-                            <Card.Body>
-                                <div className="author">
-                                    <a href="#pablo" onClick={(e) => e.preventDefault()}>
-                                        <img
-                                            alt="..."
-                                            className="avatar border-gray"
-                                            src={require("assets/img/faces/face-3.jpg")}
-                                        ></img>
-                                        <h5 className="title">Mike Andrew</h5>
-                                    </a>
-                                    <p className="description">michael24</p>
-                                </div>
-                                <p className="description text-center">
-                                    "Lamborghini Mercy <br></br>
-
-                                </p>
-                            </Card.Body>
-                            <hr></hr>
-                        </Card>
-                    </Col>
+                   
 
                     <Col md="12">
                         <Card className="card-plain table-plain-bg">

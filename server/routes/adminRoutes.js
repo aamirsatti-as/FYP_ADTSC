@@ -19,4 +19,5 @@ router.delete('/deleteDetection',control.DeleteDetection)
 router.post('/addNotifier',control.AddNotifier)
 router.get('/getNotifier',control.GetNotifier)
 router.delete('/deleteNotifier',control.DeleteNotifier)
+router.get('/getAllRecords',control.GetAllRecords)
 module.exports = router;
