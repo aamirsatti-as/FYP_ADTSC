@@ -8,7 +8,7 @@ import FixedPlugin from "components/FixedPlugin/FixedPlugin.js";
 import { Outlet } from 'react-router-dom';
 import routes from "routes.js";
 
-import sidebarImage from "assets/img/sidebar-8.jpg";
+import sidebarImage from "assets/img/sidebar-6.jpg";
 
 function Admin({ children }) {
   const [image, setImage] = React.useState(sidebarImage);

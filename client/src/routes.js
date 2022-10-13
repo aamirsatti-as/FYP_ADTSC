@@ -17,8 +17,8 @@
 */
 import Dashboard from "views/Dashboard.js";
 import UserProfile from "views/UserProfile.js";
-import TableList from "views/TableList.js";
-import Typography from "views/Typography.js";
+import Detection from "views/Detection.js";
+import Traceback from "views/Traceback.js";
 import Icons from "views/Icons.js";
 import Maps from "views/Maps.js";
 import Notifications from "views/Notifications.js";
@@ -52,16 +52,16 @@ const dashboardRoutes = [
     path: "/detection",
     name: "Detection",
     icon: "nc-icon nc-notes",
-    component: TableList,
+    component: Detection,
     layout: "/admin"
   },
-  {
-    path: "/typography",
-    name: "Back Track",
-    icon: "nc-icon nc-paper-2",
-    component: Typography,
-    layout: "/admin"
-  },
+  // {
+  //   path: "/traceback",
+  //   name: "Back Track",
+  //   icon: "nc-icon nc-paper-2",
+  //   component: Traceback,
+  //   layout: "/admin"
+  // },
   {
     path: "/icons",
     name: "Live Footage ",

@@ -59,8 +59,6 @@ const deleteNotification=async(d_id)=>{
       setResult(result);
     }
   };
-
-
   useEffect(() => {
     fetchData()
   }, []);

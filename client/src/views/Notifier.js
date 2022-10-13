@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { Modal,ModalHeader,ModalBody } from "reactstrap";
 // react-bootstrap components
 import {
     Badge,
@@ -17,6 +18,7 @@ import {
 } from "react-bootstrap";
 
 function Notifier() {
+    const [modal,setModal]=useState(false);
     const deleteDetection = async (d_id) => {
 
         const res = await fetch("http://localhost:5000/deleteNotifier", {
@@ -229,6 +231,15 @@ function Notifier() {
                                                             </button>
                                                         </td>
 
+                                                        {/* <td>
+                                                            <button
+                                                                className="btn btn-danger "
+                                                                onClick={() => setModal(true)}
+                                                            >
+                                                                Edit
+                                                            </button>
+                                                        </td> */}
+
                                                     </tr>
                                                 </tbody>
                                             );
@@ -240,6 +251,98 @@ function Notifier() {
                     </Col>
                 </Row>
             </Container>
+
+            {/* <Modal
+    size="lg"
+    isOpen={modal}
+    toggle={()=>setModal(!modal)}>
+      <ModalHeader
+      toggle={()=>setModal(!modal)}>
+        
+      </ModalHeader>
+
+      <ModalBody>
+      
+        <form > 
+          <Row>
+            <Col lg={12}>
+                  <div>
+                    <label htmlFor='oldPassword'>
+                      Old Password
+                    </label>
+                    <input
+                    defaultValue={result.FirstName}
+                    type='text'
+                    className='form-control'
+                    // placeholder='Enter Old Password'
+                    name='oldPassword'
+                    // onChange={handleChange}
+                    required>
+                    
+
+                    </input>
+                  
+                  </div>
+            </Col>
+
+            <Col lg={12}>
+                  <div>
+                    <label htmlFor='newPassword'>
+                      New Password
+                    </label>
+                    <input
+                    type='text'
+                    className='form-control'
+                    placeholder='Enter New Password'
+                    name='newPassword'
+                    // onChange={handleChange}
+                    required>
+                    
+
+                    </input>
+                  
+                  </div>
+            </Col>
+
+            <Col lg={12}>
+                  <div>
+                    <label htmlFor='cnfrmNewPassword'>
+                      Confirm New Password
+                    </label>
+                    <input
+                    type='text'
+                    className='form-control'
+                    placeholder='Enter Old Password'
+                    name='cnfrmNewPassword'
+                    required
+                    // onChange={handleChange}
+                    >
+                    
+
+                    </input>
+                  
+                  </div>
+            </Col>
+            <input
+                style={{
+                    backgroundColor: '#1DC7EA',
+                    color: '#FFFFFF',
+                    opacity: 1,
+                    padding: '10px 20px',
+                    borderRadius: '0.25rem',
+                    margin: '10px',
+                    textAlign: 'center',
+                    border: '1px solid transparent',
+                    borderColor: '#17a2b8',
+                    float: 'right'
+                }}
+                type="submit"
+                value="Change Password"
+            />
+          </Row>
+        </form>
+      </ModalBody>
+    </Modal> */}
             <ToastContainer
                 position="top-center"
                 autoClose={2000}

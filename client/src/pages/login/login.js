@@ -17,18 +17,43 @@ const login = () => {
     const handleLogin =async (e) => {
         e.preventDefault();
         console.log(formData)
-        const data = await axios.post('http://localhost:5000/login', formData).then((response)=>{
-            if (response.status==200) {
-                navigate('/admin/dashboard')
-            }
-           }).catch(function (error) {
-                if (error.response.status==422) {
-                    toast.error('Something Went wrong, Try Again');
-                    console.log(error)
-                    console.log(error.message)
-                }
+        const email=formData.email;
+        const password=formData.password;
+        const res = await fetch("http://localhost:5000/login", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              email,
+              password
+            }),
+          });
+          const data = await res.json();
+          var token=data.token;
+        //   console.log(data.token+"asdf")
+          if (res.status === 422) {
+            toast.error(data.message);
+          }
+          if (res.status === 200) {
+            toast(data.message);
+            localStorage.setItem('profile', JSON.stringify({ data }));
+            navigate('/admin/dashboard');
+          }
+
+        // const data = await axios.post('http://localhost:5000/login', formData).then((response)=>{
+        //     if (response.status==200) {
+        //         navigate('/admin/dashboard')
+        //     }
+        //    }).catch(function (error) {
+        //         if (error.response.status==422) {
+        //             toast.error('Invalid Credentials');
+        //             console.log(error)
+        //             console.log(error.message)
+        //             // toast(error.message)
+        //         }
           
-           })
+        //    })
 
         // dispatch(signin(formData,navigate));
         // navigate('/admin')
@@ -79,7 +104,7 @@ const login = () => {
                                         <div className="w-50 text-left">
                                         </div>
                                         <div className="w-50 text-md-right">
-                                            <a href="#">Forgot Password</a>
+                                            <a href="reset">Forgot Password</a>
                                         </div>
                                     </div>
                                 </form>

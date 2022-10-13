@@ -25,14 +25,26 @@ function Dashboard() {
   const [data, setData] = useState([]);
   const navigate=useNavigate()
   const fetchData = async () => {
-
-    let result = await fetch("http://localhost:5000/getNotifier");
+    // localStorage.setItem('profile', JSON.stringify(items));
+    const user=localStorage.getItem('profile')
+    let result = await fetch("http://localhost:5000/getNotifier", {
+      method: "GET",
+      headers: {
+        Accept:"applicatio/json",
+        "Content-Type": "application/json",
+        'auth-token':localStorage.getItem('profile')
+      },
+    });
+  
+    // const data = await res.json();
+    // let result = await fetch("http://localhost:5000/getNotifier");
     result = await result.json();
     setResult(result);
     let data = await fetch("http://localhost:5000/getAllRecords");
     data = await data.json();
     setData(data);
 };
+
 
 useEffect(() => {
     fetchData()
@@ -58,6 +70,7 @@ const handleNotifier=(e)=>{
         body: JSON.stringify({
             d_id,
         }),
+      credentials:'include'
     });
     const data = await res.json();
     if (res.status === 422) {

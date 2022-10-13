@@ -160,7 +160,9 @@ function Header() {
                   href="#pablo"
                   onClick={(e) => {
                     e.preventDefault()
+                    localStorage.clear('profile');
                     navigate('/')
+                    window.location.reload()
                   }}
                 >
                   Logout
@@ -183,6 +185,9 @@ function Header() {
       <ModalBody>
         <form onSubmit={handlePassword}> 
           <Row>
+          <Col lg={12}>
+            <h1>Change Password</h1>
+          </Col>
             <Col lg={12}>
                   <div>
                     <label htmlFor='oldPassword'>
