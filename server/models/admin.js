@@ -46,6 +46,8 @@ const adminSchema = new mongoose.Schema({
         type:String,
         required:true
     },
+    resetToken:String,
+    expireToken:Date,
     tokens: [
         {
             token:{
@@ -62,8 +64,20 @@ adminSchema.pre('save', async function(next){
     next();
   })
 
+// adminSchema.methods.generateAuthToken = async function(){
+//     try{
+//         this.tokens = ({token:myToken});
+//         await this.save();
+//         return myToken;
+//     }
+    
+//     catch(err){console.log(err)};
+
+// }
+
 adminSchema.methods.generateAuthToken = async function(){
     try{
+        console.log("hi")
         let myToken = jwt.sign({_id:this._id},'IAmGeneratingTokenToAuthticateCredintialBelongToUser');
         this.tokens = ({token:myToken});
         await this.save();
@@ -73,4 +87,5 @@ adminSchema.methods.generateAuthToken = async function(){
     catch(err){console.log(err)};
 
 }
+
 module.exports = mongoose.model('admin',adminSchema)

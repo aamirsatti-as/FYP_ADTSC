@@ -19,5 +19,8 @@ var DetectionSchema = new schema({
         type: String,
         required: true,
     },
+    Traceback_Image: {
+        type: String,
+    },
 });
 module.exports = mongoose.model('Detection', DetectionSchema);

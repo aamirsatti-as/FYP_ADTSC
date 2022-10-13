@@ -4,30 +4,40 @@ const Notification = require('../models/notification.js')
 const bcrypt = require('bcryptjs');
 const Notifiers = require('../models/notifier.js')
 const jwt = require('jsonwebtoken')
+const crypto = require('crypto')
+var nodemailer = require('nodemailer');
+const sendgridTransport = require('nodemailer-sendgrid-transport')
+const Nexmo = require('nexmo');
+
+
 module.exports = {
 
     login: async (req, res) => {
-        console.log('inside')
+        const { linkDetect, labelDetect } = req.body;
+        console.log(linkDetect)
+        console.log(labelDetect)
+        console.log('ad')
+        return
         const { email, password } = req.body;
+
+        console.log(req.headers)
+        // return
         // const Company='ADTSC',UserName='Aamir123',FirstName='Aamir',LastName='Naseer',Address='Alipur Islamabad',Country='Pakistan',Phone='0341561132',City='Islamabad',AboutMe='Student';
 
         // const admin2 = new Admin({ email, password,Company, UserName, FirstName, LastName, Address, City, Country, Phone, AboutMe })
-        // console.log('hi')
         // const s = await admin2.save()
         const find = await Admin.findOne({ email: email });
-        console.log('hi')
         if (find) {
             const isMatch = await bcrypt.compare(req.body.password, find.password);
             if (isMatch) {
                 const token = await find.generateAuthToken();
-                console.log(token)
-                res.cookie("jwtoken", token, {
-                    expires: new Date(Date.now() + 25892000000),
-                    httpOnly: true,
-                    secure: true,
-                    sameSite: 'none'
-                });
-                return res.status(200).json({ result: find, token });
+                // res.cookie("jwtoken", token, {
+                //     expires: new Date(Date.now() + 25892000000),
+                //     httpOnly: true,
+                //     secure: true,
+                //     sameSite: 'none'
+                // });
+                return res.status(200).json({ token });
                 // res.status(200).json({ result: oldUser, token });
 
             }
@@ -41,7 +51,6 @@ module.exports = {
     },
 
     changePassword: async (req, res) => {
-
         const { oldPassword, newPassword, cnfrmNewPassword } = req.body;
         if (newPassword != cnfrmNewPassword) {
             return res.status(422).json({ message: "Password and confirm password does not matches" });
@@ -127,10 +136,14 @@ module.exports = {
 
         // prints date in YYYY-MM-DD format
 
+        let Anomaly_Time
+        if (hours <= 11)
+            Anomaly_Time = hours + ":" + minutes + "AM";
+        else
+            Anomaly_Time = hours + ":" + minutes + "PM";
+
+
         const Anomaly_Date = year + "-" + month + "-" + date;
-        const Anomaly_Time = hours + ":" + minutes;
-
-
         const Detect = new Detection({ Anomaly_ID, Anomaly_Name, Anomaly_Date, Anomaly_Time })
         const save = await Detect.save()
         return res.status(201).send(save);
@@ -264,6 +277,7 @@ module.exports = {
         }
     },
     GetAllRecords: async (req, res) => {
+        console.log(req.headers)
         let TotalDetection = await Detection.count({})
         let TotalNotifier = await Notifiers.count({})
         let detection = await Detection.find();
@@ -298,14 +312,14 @@ module.exports = {
                             TotalDetectionLastDay += 1;
                         }
                     }
-                    if (splitMonth == '9' || splitMonth == '11' ) {
+                    if (splitMonth == '9' || splitMonth == '11') {
                         if (splitDate == '30' && date == '1') {
-                                TotalDetectionLastDay += 1;
+                            TotalDetectionLastDay += 1;
                         }
                     }
                 }
-                else if(month%2==0){
-                    if(splitMonth=='2'){
+                else if (month % 2 == 0) {
+                    if (splitMonth == '2') {
                         if (splitDate == '29' && date == '1') {
                             TotalDetectionLastDay += 1;
                         }
@@ -313,19 +327,169 @@ module.exports = {
                             TotalDetectionLastDay += 1;
                         }
                     }
-                    if (splitMonth == '4' || splitMonth == '6' ) {
+                    if (splitMonth == '4' || splitMonth == '6') {
                         if (splitDate == '30' && date == '1') {
-                                TotalDetectionLastDay += 1;
+                            TotalDetectionLastDay += 1;
                         }
                     }
-                    if (splitMonth == '8' || splitMonth == '10' ) {
+                    if (splitMonth == '8' || splitMonth == '10') {
                         if (splitDate == '31' && date == '1') {
-                                TotalDetectionLastDay += 1;
+                            TotalDetectionLastDay += 1;
                         }
-                    }      
+                    }
                 }
             }
-            })
+        })
         res.status(200).json({ TotalDetection, TotalNotifier, TotalDetectionLastDay })
+    },
+    ResetPassword: (req, res) => {
+        const EMAIL = 'aamirsatti507@gmail.com'
+        const transporter = nodemailer.createTransport(sendgridTransport({
+            auth: {
+                api_key: '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'
+            }
+        }))
+        crypto.randomBytes(32, (err, buffer) => {
+            if (err) {
+                console.log(err)
+            }
+            const token = buffer.toString("hex")
+            Admin.findOne({ email: req.body.email })
+                .then(admin => {
+                    if (!admin) {
+                        return res.status(422).json({ error: "Admin dont exists with that email" })
+                    }
+                    admin.resetToken = token
+                    admin.expireToken = Date.now() + 3600000
+                    admin.save().then((result) => {
+                        transporter.sendMail({
+                            to: admin.email,
+                            from: "no-replay@insta.com",
+                            subject: "password reset",
+                            html: `
+                        <p>You requested for password reset</p>
+                        <h1>Click Here</h1>
+                        `
+                        })
+                        res.json({ message: "check your email" })
+                    })
+
+                })
+        })
+    },
+    LiveStream: async (req, res) => {
+        const {  link, label } = req.body
+        console.log('inside live')
+
+       const latitude= 33.6518
+       const longitude=73.1566
+        let Anomaly_Name = label
+        let Traceback_Image = link
+        var Anomaly_ID = await Detection.count({})
+        Anomaly_ID = Anomaly_ID + 1;
+
+        // console.log(Detection.find().count()+1);
+        let date_time = new Date();
+
+        // get current date
+        // adjust 0 before single digit date
+        let date = ("0" + date_time.getDate()).slice(-2);
+
+        // get current month
+        let month = ("0" + (date_time.getMonth() + 1)).slice(-2);
+
+        // get current year
+        let year = date_time.getFullYear();
+
+        // get current hours
+        let hours = date_time.getHours();
+
+        // get current minutes
+        let minutes = date_time.getMinutes();
+
+        // get current seconds
+        let seconds = date_time.getSeconds();
+
+        // prints date in YYYY-MM-DD format
+
+        let Anomaly_Time
+        if (hours <= 11)
+            Anomaly_Time = hours + ":" + minutes + "AM";
+        else
+            Anomaly_Time = hours + ":" + minutes + "PM";
+
+
+        const Anomaly_Date = year + "-" + month + "-" + date;
+        const Detect = new Detection({ Anomaly_ID, Anomaly_Name, Anomaly_Date, Anomaly_Time, Traceback_Image })
+        const save = await Detect.save()
+        // return res.status(201).send(save);
+        const fetch = (...args) => import('node-fetch').then(({ default: fetch }) =>
+            fetch(...args));
+        const accountSid = 'AC6ec48faac2997017af74d647c018364d';
+        const authToken = '96bf4a0810b50254add7c2fb43b34ca5';
+        var twilio = require("twilio");
+        var client = new twilio(accountSid, authToken);
+
+
+        try {
+            const apiResponse = await fetch(
+                `http://api.positionstack.com/v1/reverse?access_key=a2a6d7cce8110ca44006b2249e5a48bc&query=${latitude},${longitude}`
+            )
+            var apiResponseJson = await apiResponse.json()
+            const  Notification_Name  = label;
+            const Notification_Receiver = 'Admin';
+            var Notification_ID = await Notification.count({})
+            Notification_ID = Notification_ID + 1;
+
+            const Notification_Date = year + "-" + month + "-" + date;
+
+            let Notification_Time
+            if (hours <= 11)
+                Notification_Time = hours + ":" + minutes + "AM";
+            else
+                Notification_Time = hours + ":" + minutes + "PM";
+            const Notify = new Notification({ Notification_ID, Notification_Name, Notification_Receiver, Notification_Date, Notification_Time })
+           
+            await Notify.save()
+            // if(save)
+            // console.log('saved')
+
+            if (apiResponseJson) {
+                let location = apiResponseJson.data[1].label;
+                client.messages
+                    .create({
+                        body: label + " Detected At " + location,
+                        from: +18336934389,
+                        to: +923185021068,
+                    })
+                    .then((message) => {
+
+                        console.log("sent succesfully")
+                        res.status(200).send(`The message  sent succesfully!`)
+
+                    }).catch((err) => {
+
+                        console.error("phone : ", err.message);
+
+                         res.status(422).send({ error: err.message });
+
+                    });
+                    
+                    
+            }
+            else {
+                console.log('something went wrong')
+                return res.json({ error: err.message });
+            }
+
+        }
+        catch (err) {
+            console.log(err)
+            res.status(500).send('Something went wrong')
+        }
+
+
+
     }
 }
+// <h5>click in this <a href="${EMAIL}/reset/${token}">link</a> to reset password</h5>
