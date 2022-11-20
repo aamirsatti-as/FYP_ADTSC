@@ -2,8 +2,12 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { Modal,ModalHeader,ModalBody } from "reactstrap";
-// react-bootstrap components
+import './notifier.css'
+import { AddNotifier } from "../actions/addnotifier";
+import {useDispatch,useSelector} from 'react-redux';
+import { UpdateNotifier } from "../actions/addnotifier";
+import { Modal, ModalHeader, ModalBody } from "reactstrap"
+
 import {
     Badge,
     Button,
@@ -18,7 +22,16 @@ import {
 } from "react-bootstrap";
 
 function Notifier() {
-    const [modal,setModal]=useState(false);
+    const [modal, setModal] = useState(false);
+    const dispatch = useDispatch();
+    // const selector=useSelector()
+
+    const [searchValue, setSearchValue] = useState();
+    const [data, setData] = useState([{}]);
+    const [result, setResult] = useState([]);
+    const [searchItem, setsearchItem] = useState(null);
+    const [modalData, setModalData] = useState();
+    const [editId,setEditId]=useState(null)
     const deleteDetection = async (d_id) => {
 
         const res = await fetch("http://localhost:5000/deleteNotifier", {
@@ -32,54 +45,95 @@ function Notifier() {
         });
         const data = await res.json();
         if (res.status === 422) {
-          toast.error(data.message);
+            toast.error(data.message);
         }
         if (res.status === 200) {
-          toast(data.message);
+            toast(data.message);
         }
-    
+
         fetchData()
 
     }
-    const [result, setResult] = useState([]);
+    const AddNotifierState = useSelector((state) => state.AddNotifier);
+    
+
     const postNotifier = async (e) => {
         e.preventDefault()
-        console.log(formData)
-        const data = await axios.post('http://localhost:5000/addNotifier', formData).then((response)=>{
-            if (response.status==200) {
-                toast('Notifier Added Successfully');
-            }
-           }).catch(function (error) {
-                if (error.response.status==400) {
-                    toast.error('Email Already Exists');
-                    console.log(error)
-                    console.log(error.message)
-                }
-          
-           })
+        dispatch(AddNotifier(formData));
+        console.log(AddNotifierState.status + "inside Notu")
+
+        // console.log(formData)
+        // const data = await axios.post('http://localhost:5000/addNotifier', formData).then((response)=>{
+        //     if (response.status==200) {
+        //         toast('Notifier Added Successfully');
+        //     }
+        //    }).catch(function (error) {
+        //         if (error.response.status==400) {
+        //             toast.error('Email Already Exists');
+        //             console.log(error)
+        //             console.log(error.message)
+        //         }
+
+        //    })
 
     }
+    const handleSearch = async () => {
+        console.log(searchValue)
+        setResult(data.filter((item) => item.FirstName.includes(searchValue)))
+        console.log(result)
+    }
+
 
     const fetchData = async () => {
 
         let result = await fetch("http://localhost:5000/getNotifier");
         result = await result.json();
         setResult(result);
+        setData(result)
     };
 
     useEffect(() => {
         fetchData()
     }, []);
 
-    useEffect(() => {
-        fetchData()
-    }, [result]);
-
+    // useEffect(() => {
+    //     fetchData()
+    // }, [result]);
+    
     const initialState = { UserName: '', Email: '', FirstName: '', LastName: '', Phone: '', };
     const [formData, setFormData] = useState(initialState);
 
-
+    const handleModalChange = (e) => setModalData({ ...modalData, [e.target.name]: e.target.value });
     const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
+
+
+    const handleSubmit = async (e_id) => {
+        
+        const res = await axios.post("http://localhost:5000/getUpdateNotifier", {e_id})
+        setEditId(e_id)
+        setsearchItem(res.data)
+        setModalData(res.data)
+        // setsearchItem(result.filter((item) => item._id === e_id))
+    
+    }
+    const submitEditInformation = async (e) => {
+
+        e.preventDefault()
+        dispatch(UpdateNotifier(modalData,editId));
+        fetchData()
+        setModal(false)
+        // const UpdateNotifierState = useSelector((state) => state.updateNotifier);
+        // console.log(UpdateNotifierState,'  jh')
+
+        // if(editId)
+        // {
+        //     const res=await axios.put('http://localhost:5000/updateNotifier',{UserName,Email,Phone,FirstName,LastName,editId})  
+        //     console.log(res)      
+
+        // }
+    }
+
+    
 
 
     return (
@@ -187,7 +241,20 @@ function Notifier() {
                             </Card.Body>
                         </Card>
                     </Col>
-                   
+
+                    <Col md='12'>
+                        <div className="input-group md-form form-sm form-2 pl-0 pb-1">
+                            <input className="form-control my-0 py-1 red-border" type="text" placeholder="Search" aria-label="Search" onChange={(e) => setSearchValue(e.target.value)} />
+                            <div className="input-group-append">
+                                <button className="btn btn-outline-secondary border-start-0 border rounded-pill ms-n3" type="button" onClick={handleSearch}>
+                                    <i className="fas fa-search text-grey"
+                                        aria-hidden="true"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </Col>
+
+
 
                     <Col md="12">
                         <Card className="card-plain table-plain-bg">
@@ -203,7 +270,8 @@ function Notifier() {
                                             <th className="border-0">UserName</th>
                                             <th className="border-0">Email</th>
                                             <th className="border-0">Phone</th>
-                                            <th className="border-0">Remove Notifier</th>
+                                            <th className="border-0">Delete</th>
+                                            <th className="border-0">Update</th>
                                         </tr>
                                     </thead>
                                     {result === null ? (
@@ -231,14 +299,18 @@ function Notifier() {
                                                             </button>
                                                         </td>
 
-                                                        {/* <td>
+                                                        <td>
                                                             <button
-                                                                className="btn btn-danger "
-                                                                onClick={() => setModal(true)}
+                                                                className="btn btn-dark"
+                                                                onClick={() => {
+                                                                    handleSubmit(result._id)
+                                                                    setModal(true)
+                                                                    // setModalData(searchItem[0])
+                                                                }}
                                                             >
                                                                 Edit
                                                             </button>
-                                                        </td> */}
+                                                        </td>
 
                                                     </tr>
                                                 </tbody>
@@ -251,98 +323,125 @@ function Notifier() {
                     </Col>
                 </Row>
             </Container>
+            {searchItem === null ? (
+                                        <h1></h1>
+                                    ) : (
+            <Modal
+                size="md"
+                isOpen={modal}
+                aria-labelledby='contained-modal-title-vcenter'
+                centered
+                toggle={() => setModal(!modal)}>
+                <ModalHeader
+                    toggle={() => setModal(!modal)}>
+                    <h4 className="cardTitle">Update Notifier</h4>
 
-            {/* <Modal
-    size="lg"
-    isOpen={modal}
-    toggle={()=>setModal(!modal)}>
-      <ModalHeader
-      toggle={()=>setModal(!modal)}>
-        
-      </ModalHeader>
+                </ModalHeader>
+                <ModalBody>
 
-      <ModalBody>
-      
-        <form > 
-          <Row>
-            <Col lg={12}>
-                  <div>
-                    <label htmlFor='oldPassword'>
-                      Old Password
-                    </label>
-                    <input
-                    defaultValue={result.FirstName}
-                    type='text'
-                    className='form-control'
-                    // placeholder='Enter Old Password'
-                    name='oldPassword'
-                    // onChange={handleChange}
-                    required>
-                    
+                    {/* <form > */}
+                    <Row>
 
-                    </input>
-                  
-                  </div>
-            </Col>
+                        <Col className="px-1" md='12'>
+                            <Form onSubmit={submitEditInformation}>
+                                {/* <Form> */}
+                                <Form.Group>
 
-            <Col lg={12}>
-                  <div>
-                    <label htmlFor='newPassword'>
-                      New Password
-                    </label>
-                    <input
-                    type='text'
-                    className='form-control'
-                    placeholder='Enter New Password'
-                    name='newPassword'
-                    // onChange={handleChange}
-                    required>
-                    
+                                    <Form.Control className="formControl"
+                                        defaultValue={searchItem.Email}
+                                        type='text'
+                                        name='Email'
+                                        onChange={handleModalChange}
+                                        required
+                                    >
 
-                    </input>
-                  
-                  </div>
-            </Col>
+                                    </Form.Control>
 
-            <Col lg={12}>
-                  <div>
-                    <label htmlFor='cnfrmNewPassword'>
-                      Confirm New Password
-                    </label>
-                    <input
-                    type='text'
-                    className='form-control'
-                    placeholder='Enter Old Password'
-                    name='cnfrmNewPassword'
-                    required
-                    // onChange={handleChange}
-                    >
-                    
+                                </Form.Group>
 
-                    </input>
-                  
-                  </div>
-            </Col>
-            <input
-                style={{
-                    backgroundColor: '#1DC7EA',
-                    color: '#FFFFFF',
-                    opacity: 1,
-                    padding: '10px 20px',
-                    borderRadius: '0.25rem',
-                    margin: '10px',
-                    textAlign: 'center',
-                    border: '1px solid transparent',
-                    borderColor: '#17a2b8',
-                    float: 'right'
-                }}
-                type="submit"
-                value="Change Password"
-            />
-          </Row>
-        </form>
-      </ModalBody>
-    </Modal> */}
+                                <Form.Group>
+
+                                    <Form.Control
+                                        className="formControl"
+                                        type='text'
+                                        name='FirstName'
+                                        required
+                                        onChange={handleModalChange}
+                                        defaultValue={searchItem.FirstName}
+                                    >
+
+                                    </Form.Control>
+
+                                </Form.Group>
+
+                                <Form.Group>
+
+                                    <Form.Control
+                                    className="formControl"
+                                        type='text'
+                                        name='LastName'
+                                        onChange={handleModalChange}
+                                        required
+                                        defaultValue={searchItem.LastName}
+                                    >
+
+                                    </Form.Control>
+
+                                </Form.Group>
+
+                                <Form.Group>
+
+                                    <Form.Control
+                                    className="formControl"
+                                        type='text'
+                                        name='UserName'
+                                        onChange={handleModalChange}
+                                        required
+                                        defaultValue={searchItem.UserName}
+                                    >
+
+                                    </Form.Control>
+
+                                </Form.Group>
+
+                                <Form.Group>
+                                    <Form.Control
+                                    className="formControl"
+                                        type='text'
+                                        name='Phone'
+                                        onChange={handleModalChange}
+                                        required
+                                        defaultValue={searchItem.Phone}
+                                    >
+
+                                    </Form.Control>
+
+                                </Form.Group>
+
+                                <input
+                                    style={{
+                                        backgroundColor: '#1DC7EA',
+                                        color: '#FFFFFF',
+                                        opacity: 1,
+                                        padding: '10px 20px',
+                                        borderRadius: '0.25rem',
+                                        margin: '10px',
+                                        textAlign: 'center',
+                                        border: '1px solid transparent',
+                                        borderColor: '#17a2b8',
+                                        float: 'right'
+                                    }}
+                                    type="submit"
+                                    value="Submit"
+                                />
+
+                            </Form>
+                        </Col>
+                    </Row>
+                </ModalBody>
+            </Modal>
+            )}
+
             <ToastContainer
                 position="top-center"
                 autoClose={2000}

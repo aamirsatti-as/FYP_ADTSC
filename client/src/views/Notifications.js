@@ -104,6 +104,10 @@ const deleteNotification=async(d_id)=>{
                   <span>
                     {result.Notification_Time}
                   </span>
+
+                  <span>
+                    {result.Notification_Date}
+                  </span>
                   
                 </Alert>
               </Col>

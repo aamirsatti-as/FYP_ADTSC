@@ -17,8 +17,11 @@ import {
 } from "react-bootstrap";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import {useDispatch,useSelector} from 'react-redux';
+import { UpdateNotifier } from "../actions/updateUserAction";
 
 function User() {
+  const dispatch=useDispatch()
   const [result, setResult] = useState([]);
   const { user, setUser } = useContext(UserContext);
   var [check, setCheck] = useState(true);
@@ -70,8 +73,6 @@ function User() {
 
   if(!result.email && !user){
     setUser(true)
-    // handleReload()
-    // console.log('asdf')
     window.location.reload()
   }
 
@@ -93,18 +94,21 @@ function User() {
       setPhoneErr(true)
       return
     }
-    const data = axios.post('http://localhost:5000/updateUser', formData).then((response) => {
-      if (response.status == 200) {
-        toast('User Profile Edited Successfully');
-      }
-    }).catch(function (error) {
-      if (error.response.status == 422) {
-        toast.error('Something Went Wrong, Try Again!');
-        console.log(error)
-        console.log(error.message)
-      }
 
-    })
+    dispatch(UpdateNotifier(formData));
+
+    // const data = axios.post('http://localhost:5000/updateUser', formData).then((response) => {
+    //   if (response.status == 200) {
+    //     toast('User Profile Edited Successfully');
+    //   }
+    // }).catch(function (error) {
+    //   if (error.response.status == 422) {
+    //     toast.error('Something Went Wrong, Try Again!');
+    //     console.log(error)
+    //     console.log(error.message)
+    //   }
+
+    // })
 
   }
   if (user) {

@@ -6,11 +6,10 @@ import { BrowserRouter } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import { legacy_createStore, applyMiddleware, compose } from 'redux';
 import thunk from 'redux-thunk';
-import reducers from './reducer'
+
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-
-const store = legacy_createStore(reducers, compose(applyMiddleware(thunk)))
+import store from "./store";
 
 ReactDOM.render(
   <React.StrictMode>

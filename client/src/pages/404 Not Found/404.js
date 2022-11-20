@@ -10,7 +10,7 @@ const Four0Four = () => {
 			</div>
 			<h2>Page not found</h2>
 			<p>The page you are looking for might have been removed had its name changed or is temporarily unavailable.</p>
-			<a href="/">Back To Login</a>
+			<a href="/admin/dashboard">Back To Admin Dashboard</a>
 		</div>
 	</div>
   )

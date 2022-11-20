@@ -38,7 +38,7 @@ const navigate=useNavigate()
     return (
 
       <Routes>
-        <Route exact path="/" element={<Login />} />
+        <Route exact path="*" element={<Login />} />
         
         
       </Routes>
@@ -85,6 +85,7 @@ const navigate=useNavigate()
             <Route path="/traceback" element={<ShowTraceback />} />
             <Route path="/notification" element={<Notifications />} />
             <Route path="/location" element={<Location />} />
+            <Route exact path="*" element={<Four0Four />} />
           </Routes>
         </UserContext.Provider>
       </div>

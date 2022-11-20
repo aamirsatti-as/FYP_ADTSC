@@ -13,11 +13,7 @@ const Nexmo = require('nexmo');
 module.exports = {
 
     login: async (req, res) => {
-        const { linkDetect, labelDetect } = req.body;
-        console.log(linkDetect)
-        console.log(labelDetect)
-        console.log('ad')
-        return
+
         const { email, password } = req.body;
 
         console.log(req.headers)
@@ -79,6 +75,8 @@ module.exports = {
     UpdateUser: async (req, res) => {
         const { Company, UserName, email, FirstName, LastName, Address, City, Country, Phone, AboutMe } = req.body;
         // const Company=req.body.Company;
+        console.log(UserName)
+        console.log('hi')
 
         const admin = await Admin.findOne();
         if (admin) {
@@ -239,10 +237,13 @@ module.exports = {
         }
     },
     AddNotifier: async (req, res) => {
+        console.log('inside add')
+        // FirstName, LastName, Phone, Email, UserName, 
         const { FirstName, LastName, Phone, Email, UserName } = req.body;
+        console.log(FirstName, LastName, Phone, Email, UserName)
         const find = await Notifiers.findOne({ Email: Email });
         if (find) {
-            return res.status(400).json({ message: 'Notifier already exist' });
+            return res.status(422).json({ message: 'Notifier already exist' });
         }
         if (!find) {
             const notifier = new Notifiers({ Email, UserName, FirstName, LastName, Phone })
@@ -256,7 +257,7 @@ module.exports = {
             return res.status(200).send(find);
         }
         else {
-            res.status(404).send({ message: "Record Not Found" })
+            return res.status(404).send({ message: "Record Not Found" })
         }
     }
     ,
@@ -378,18 +379,42 @@ module.exports = {
         })
     },
     LiveStream: async (req, res) => {
-        const {  link, label } = req.body
+
+        // let count = await Detection.count({})
+        // let lastRecord=Detection.findOne({$query: {}, $orderby: {$natural : -1}})
+        let lastRecord = await Detection.find().sort({ _id: -1 }).limit(1);
+        // console.log(Detection.find().count()+1);
+        let date_time = new Date();
+        let lastDetectedTime = lastRecord[0].Anomaly_Time;
+        let split = lastDetectedTime.split(':')
+        let splitHour = split[0];
+        let splitMinute = split[1].slice(0, -2);
+        let presentHours = date_time.getHours();
+
+        // get current minutes
+        let presentMinutes = date_time.getMinutes();
+        // console.log(presentHours + ' pH')
+        // console.log(presentMinutes + 'pM')
+        if(presentHours==splitHour &&  presentMinutes==splitMinute)
+            return res.status(422).json({message:'record can only be saved after 1 minure'})
+        else
+        {
+        // let splitDate = split[2];
+
+        console.log(splitHour)
+        console.log(splitMinute)
+
+        const { link, label } = req.body
         console.log('inside live')
 
-       const latitude= 33.6518
-       const longitude=73.1566
+        const latitude = 33.6518
+        const longitude = 73.1566
         let Anomaly_Name = label
         let Traceback_Image = link
         var Anomaly_ID = await Detection.count({})
         Anomaly_ID = Anomaly_ID + 1;
 
-        // console.log(Detection.find().count()+1);
-        let date_time = new Date();
+
 
         // get current date
         // adjust 0 before single digit date
@@ -436,7 +461,7 @@ module.exports = {
                 `http://api.positionstack.com/v1/reverse?access_key=a2a6d7cce8110ca44006b2249e5a48bc&query=${latitude},${longitude}`
             )
             var apiResponseJson = await apiResponse.json()
-            const  Notification_Name  = label;
+            const Notification_Name = label;
             const Notification_Receiver = 'Admin';
             var Notification_ID = await Notification.count({})
             Notification_ID = Notification_ID + 1;
@@ -449,7 +474,7 @@ module.exports = {
             else
                 Notification_Time = hours + ":" + minutes + "PM";
             const Notify = new Notification({ Notification_ID, Notification_Name, Notification_Receiver, Notification_Date, Notification_Time })
-           
+
             await Notify.save()
             // if(save)
             // console.log('saved')
@@ -471,11 +496,11 @@ module.exports = {
 
                         console.error("phone : ", err.message);
 
-                         res.status(422).send({ error: err.message });
+                        res.status(422).send({ error: err.message });
 
                     });
-                    
-                    
+
+
             }
             else {
                 console.log('something went wrong')
@@ -487,8 +512,45 @@ module.exports = {
             console.log(err)
             res.status(500).send('Something went wrong')
         }
+    }
 
-
+    },
+    SearchDetection : async (req, res) => {
+        const Anomaly_Name =req.body;
+        
+    },
+    GetUpdateNotifier: async (req, res) => {
+        const { e_id } = req.body;
+        console.log(e_id)
+        try {
+            const data = await Notifiers.findOne({ _id: e_id });
+            console.log(data)
+            if (data) {
+                return res.status(200).send(data);
+            }
+            else {
+                return res.status(422).json({ message: "Try Again" });
+            }
+        } catch (err) {
+            console.log(err);
+        }
+    },
+    UpdateNotifier: async(req,res)=>{
+        console.log(req.body)
+        const { UserName, FirstName, LastName, Phone, Email,editId } = req.body;
+        
+        
+        try {
+            const data = await Notifiers.findByIdAndUpdate({ _id: editId },{Email:Email,FirstName:FirstName,LastName:LastName,Phone:Phone,UserName:UserName},{new:true});
+            if (data) {
+                return res.status(200).json({ message: "Updated Successfullt" });
+            }
+            else {
+                return res.status(422).json({ message: "Something Went wrong.Try Again" });
+            }
+        } catch (err) {
+            console.log(err);
+        }
 
     }
 }

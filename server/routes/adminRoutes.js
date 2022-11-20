@@ -24,4 +24,7 @@ router.delete('/deleteNotifier',control.DeleteNotifier)
 router.get('/getAllRecords',control.GetAllRecords)
 router.post('/reset-password',control.ResetPassword)
 router.post('/liveStream',control.LiveStream)
+router.post('/searchDetection',control.SearchDetection)
+router.post('/getUpdateNotifier',control.GetUpdateNotifier)
+router.put('/updateNotifier',control.UpdateNotifier)
 module.exports = router;
