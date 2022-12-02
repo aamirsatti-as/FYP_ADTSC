@@ -44,7 +44,7 @@ function User() {
 
   useEffect(() => {
     fetchData()
-  }, []);
+  });
 
 
   const navigate = useNavigate();
@@ -62,19 +62,19 @@ function User() {
     setUser(false)
   }
 
-  const handleReload =async()=>{
-    let result1 = await fetch("http://localhost:5000/getAdmin");
-    result1 = await result1.json();
+  // const handleReload =async()=>{
+  //   let result1 = await fetch("http://localhost:5000/getAdmin");
+  //   result1 = await result1.json();
 
-    setFormData(result1);
-    setUser(false)
-    setResult(result1)
-  }
+  //   setFormData(result1);
+  //   setUser(false)
+  //   setResult(result1)
+  // }
 
-  if(!result.email && !user){
-    setUser(true)
-    window.location.reload()
-  }
+  // if(!result.email && !user){
+  //   setUser(true)
+  //   window.location.reload()
+  // }
 
 
   const handleUpdateProfile = (e) => {
@@ -95,20 +95,22 @@ function User() {
       return
     }
 
-    dispatch(UpdateNotifier(formData));
+    // dispatch(UpdateNotifier(fzormData));
+    
 
-    // const data = axios.post('http://localhost:5000/updateUser', formData).then((response) => {
-    //   if (response.status == 200) {
-    //     toast('User Profile Edited Successfully');
-    //   }
-    // }).catch(function (error) {
-    //   if (error.response.status == 422) {
-    //     toast.error('Something Went Wrong, Try Again!');
-    //     console.log(error)
-    //     console.log(error.message)
-    //   }
+    const data = axios.post('http://localhost:5000/updateUser', formData).then((response) => {
+      if (response.status == 200) {
+        toast('User Profile Edited Successfully');
+      }
+    }).catch(function (error) {
+      if (error.response.status == 422) {
+        toast.error('Something Went Wrong, Try Again!');
+        console.log(error)
+        console.log(error.message)
+      }
 
-    // })
+    })
+    setUser(true)
 
   }
   if (user) {

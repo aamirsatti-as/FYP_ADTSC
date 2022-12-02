@@ -2,9 +2,9 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import './notifier.css'
+
 import { AddNotifier } from "../actions/addnotifier";
-import {useDispatch,useSelector} from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { UpdateNotifier } from "../actions/addnotifier";
 import { Modal, ModalHeader, ModalBody } from "reactstrap"
 
@@ -20,6 +20,7 @@ import {
     Row,
     Col
 } from "react-bootstrap";
+import './notifier.css'
 
 function Notifier() {
     const [modal, setModal] = useState(false);
@@ -31,7 +32,10 @@ function Notifier() {
     const [result, setResult] = useState([]);
     const [searchItem, setsearchItem] = useState(null);
     const [modalData, setModalData] = useState();
-    const [editId,setEditId]=useState(null)
+    const [editId, setEditId] = useState(null)
+    const [check,setCheck]=useState(false)
+ 
+   
     const deleteDetection = async (d_id) => {
 
         const res = await fetch("http://localhost:5000/deleteNotifier", {
@@ -54,14 +58,43 @@ function Notifier() {
         fetchData()
 
     }
-    const AddNotifierState = useSelector((state) => state.AddNotifier);
+
+    if(check){
+        console.log('inseide chekc true')
+        const {cameras} = (useSelector((state) => {state.user}))
+        // const state=localStorage.getItem('user')
+        console.log("State:::",cameras)
+        // const not=localStorage.getItem("add")
+        // console.log("dsa ", not)
+        setCheck(false)
+        // console.log(state.isFetching)
+    //     if(state){
+
+        
+    //     if(state.isFetching==1){
+    //         toast('Notifier Added Successfully');
+    //     }
+    //     if(state.isFetching==2)
+    //     {
+    //         toast.error('Email Already Exists');
+    //     }
     
+    //     console.log( isFetching+ "inside Notifier")
+    // }
+        // setCheck(true)
+
+    }
 
     const postNotifier = async (e) => {
         e.preventDefault()
-        dispatch(AddNotifier(formData));
-        console.log(AddNotifierState.status + "inside Notu")
+        dispatch(AddNotifier(formData)).then(()=>{
+            console.log('asdfasd')
+            setCheck(true)
+        })
+        
 
+        // testFun()
+        
         // console.log(formData)
         // const data = await axios.post('http://localhost:5000/addNotifier', formData).then((response)=>{
         //     if (response.status==200) {
@@ -79,7 +112,9 @@ function Notifier() {
     }
     const handleSearch = async () => {
         console.log(searchValue)
-        setResult(data.filter((item) => item.FirstName.includes(searchValue)))
+        setResult(data.filter((item) => {
+            return item.FirstName.includes(searchValue) || item.LastName.includes(searchValue) || item.UserName.includes(searchValue) || item.Email.includes(searchValue) || item.Phone.includes(searchValue)
+        }))
         console.log(result)
     }
 
@@ -99,7 +134,7 @@ function Notifier() {
     // useEffect(() => {
     //     fetchData()
     // }, [result]);
-    
+
     const initialState = { UserName: '', Email: '', FirstName: '', LastName: '', Phone: '', };
     const [formData, setFormData] = useState(initialState);
 
@@ -108,18 +143,18 @@ function Notifier() {
 
 
     const handleSubmit = async (e_id) => {
-        
-        const res = await axios.post("http://localhost:5000/getUpdateNotifier", {e_id})
+
+        const res = await axios.post("http://localhost:5000/getUpdateNotifier", { e_id })
         setEditId(e_id)
         setsearchItem(res.data)
         setModalData(res.data)
         // setsearchItem(result.filter((item) => item._id === e_id))
-    
+
     }
     const submitEditInformation = async (e) => {
 
         e.preventDefault()
-        dispatch(UpdateNotifier(modalData,editId));
+        dispatch(UpdateNotifier(modalData, editId));
         fetchData()
         setModal(false)
         // const UpdateNotifierState = useSelector((state) => state.updateNotifier);
@@ -133,7 +168,7 @@ function Notifier() {
         // }
     }
 
-    
+
 
 
     return (
@@ -262,7 +297,8 @@ function Notifier() {
                                 <Card.Title as="h4">Notifiers List</Card.Title>
                             </Card.Header>
                             <Card.Body className="table-full-width table-responsive px-0">
-                                <Table className="table-hover">
+                                <Table className="table-hover  table-fixed  table-bordered
+                table-sm same-col-widths">
                                     <thead>
                                         <tr>
                                             <th className="border-0">FirstName</th>
@@ -270,8 +306,8 @@ function Notifier() {
                                             <th className="border-0">UserName</th>
                                             <th className="border-0">Email</th>
                                             <th className="border-0">Phone</th>
-                                            <th className="border-0">Delete</th>
                                             <th className="border-0">Update</th>
+                                            <th className="border-0">Delete</th>
                                         </tr>
                                     </thead>
                                     {result === null ? (
@@ -290,7 +326,42 @@ function Notifier() {
                                                         <td>{result.UserName}</td>
                                                         <td>{result.Email}</td>
                                                         <td>{result.Phone}</td>
-                                                        <td>
+                                                        <td className="btnCenter">
+                                                            <Button
+                                                                className="btn-simple btn-link"
+                                                                type="button"
+                                                                variant="info"
+                                                                onClick={() => {
+                                                                    handleSubmit(result._id)
+                                                                    setModal(true)
+                                                                    // setModalData(searchItem[0])
+                                                                }}
+                                                                style={{
+                                                                    backgroundColor: '#1DC7EA',
+                                                                    color: '#F5F5F5',
+                                                                    borderRadius: "20px",
+                                                                    opacity: 0.8,
+                                                                }}
+                                                            >
+                                                                <i className="fas fa-edit"></i>
+                                                            </Button>
+                                                        </td>
+                                                        <td className="btnCenter">
+                                                            <Button
+                                                                className="btn-simple btn-link "
+                                                                type="button"
+                                                                variant="danger"
+                                                                onClick={() => deleteDetection(result._id)}
+                                                                style={{
+                                                                    backgroundColor: '#eb0c21',
+                                                                    borderRadius: "20px",
+                                                                    color: '#FFFFFF',
+                                                                }}
+                                                            >
+                                                                <i className="fas fa-times"></i>
+                                                            </Button>
+                                                        </td>
+                                                        {/* <td>
                                                             <button
                                                                 className="btn btn-danger "
                                                                 onClick={() => deleteDetection(result._id)}
@@ -310,7 +381,7 @@ function Notifier() {
                                                             >
                                                                 Edit
                                                             </button>
-                                                        </td>
+                                                        </td> */}
 
                                                     </tr>
                                                 </tbody>
@@ -323,124 +394,127 @@ function Notifier() {
                     </Col>
                 </Row>
             </Container>
-            {searchItem === null ? (
-                                        <h1></h1>
-                                    ) : (
-            <Modal
-                size="md"
-                isOpen={modal}
-                aria-labelledby='contained-modal-title-vcenter'
-                centered
-                toggle={() => setModal(!modal)}>
-                <ModalHeader
-                    toggle={() => setModal(!modal)}>
-                    <h4 className="cardTitle">Update Notifier</h4>
+            {
+                searchItem === null ? (
+                    <h1></h1>
+                ) : (
+                    <Modal
+                        size="md"
+                        isOpen={modal}
+                        // className='modelNot'
+                        aria-labelledby='contained-modal-title-vcenter'
+                        centered
+                        toggle={() => setModal(!modal)}>
+                        <ModalHeader
+                            toggle={() => setModal(!modal)}>
+                            <h4 className="cardTitle" style={{color:'#fff'}}>Update Notifier</h4>
 
-                </ModalHeader>
-                <ModalBody>
+                        </ModalHeader>
+                        <ModalBody>
 
-                    {/* <form > */}
-                    <Row>
+                            {/* <form > */}
+                            <Row>
 
-                        <Col className="px-1" md='12'>
-                            <Form onSubmit={submitEditInformation}>
-                                {/* <Form> */}
-                                <Form.Group>
+                                <Col className="px-1" md='12'>
+                                    <Form onSubmit={submitEditInformation}>
+                                        {/* <Form> */}
+                                        <Form.Group>
 
-                                    <Form.Control className="formControl"
-                                        defaultValue={searchItem.Email}
-                                        type='text'
-                                        name='Email'
-                                        onChange={handleModalChange}
-                                        required
-                                    >
+                                            <Form.Control className="formControl"
+                                                defaultValue={searchItem.Email}
+                                                type='text'
+                                                name='Email'
+                                                onChange={handleModalChange}
+                                                required
+                                            >
 
-                                    </Form.Control>
+                                            </Form.Control>
 
-                                </Form.Group>
+                                        </Form.Group>
 
-                                <Form.Group>
+                                        <Form.Group>
 
-                                    <Form.Control
-                                        className="formControl"
-                                        type='text'
-                                        name='FirstName'
-                                        required
-                                        onChange={handleModalChange}
-                                        defaultValue={searchItem.FirstName}
-                                    >
+                                            <Form.Control
+                                                className="formControl"
+                                                type='text'
+                                                name='FirstName'
+                                                required
+                                                onChange={handleModalChange}
+                                                defaultValue={searchItem.FirstName}
+                                            >
 
-                                    </Form.Control>
+                                            </Form.Control>
 
-                                </Form.Group>
+                                        </Form.Group>
 
-                                <Form.Group>
+                                        <Form.Group>
 
-                                    <Form.Control
-                                    className="formControl"
-                                        type='text'
-                                        name='LastName'
-                                        onChange={handleModalChange}
-                                        required
-                                        defaultValue={searchItem.LastName}
-                                    >
+                                            <Form.Control
+                                                className="formControl"
+                                                type='text'
+                                                name='LastName'
+                                                onChange={handleModalChange}
+                                                required
+                                                defaultValue={searchItem.LastName}
+                                            >
 
-                                    </Form.Control>
+                                            </Form.Control>
 
-                                </Form.Group>
+                                        </Form.Group>
 
-                                <Form.Group>
+                                        <Form.Group>
 
-                                    <Form.Control
-                                    className="formControl"
-                                        type='text'
-                                        name='UserName'
-                                        onChange={handleModalChange}
-                                        required
-                                        defaultValue={searchItem.UserName}
-                                    >
+                                            <Form.Control
+                                                className="formControl"
+                                                type='text'
+                                                name='UserName'
+                                                onChange={handleModalChange}
+                                                required
+                                                defaultValue={searchItem.UserName}
+                                            >
 
-                                    </Form.Control>
+                                            </Form.Control>
 
-                                </Form.Group>
+                                        </Form.Group>
 
-                                <Form.Group>
-                                    <Form.Control
-                                    className="formControl"
-                                        type='text'
-                                        name='Phone'
-                                        onChange={handleModalChange}
-                                        required
-                                        defaultValue={searchItem.Phone}
-                                    >
+                                        <Form.Group>
+                                            <Form.Control
+                                                className="formControl"
+                                                type='text'
+                                                name='Phone'
+                                                onChange={handleModalChange}
+                                                required
+                                                defaultValue={searchItem.Phone}
+                                            >
 
-                                    </Form.Control>
+                                            </Form.Control>
 
-                                </Form.Group>
+                                        </Form.Group>
 
-                                <input
-                                    style={{
-                                        backgroundColor: '#1DC7EA',
-                                        color: '#FFFFFF',
-                                        opacity: 1,
-                                        padding: '10px 20px',
-                                        borderRadius: '0.25rem',
-                                        margin: '10px',
-                                        textAlign: 'center',
-                                        border: '1px solid transparent',
-                                        borderColor: '#17a2b8',
-                                        float: 'right'
-                                    }}
-                                    type="submit"
-                                    value="Submit"
-                                />
+                                        <input
+                                            style={{
+                                                backgroundColor: '#1DC7EA',
+                                                color: '#FFFFFF',
+                                                opacity: 1,
+                                                padding: '10px 20px',
+                                                borderRadius: '0.25rem',
+                                                margin: '10px',
+                                                textAlign: 'center',
+                                                border: '1px solid transparent',
+                                                borderColor: '#17a2b8',
+                                                float: 'right'
+                                            }}
+                                            type="submit"
+                                            value="Update"
+                                        />
 
-                            </Form>
-                        </Col>
-                    </Row>
-                </ModalBody>
-            </Modal>
-            )}
+                                    </Form>
+                                </Col>
+                            </Row>
+                        </ModalBody>
+                    </Modal>
+                )
+            }
 
             <ToastContainer
                 position="top-center"

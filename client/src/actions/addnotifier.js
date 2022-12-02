@@ -6,12 +6,16 @@ import {
     UPDATE_USER_SUCCESS
 } from "../constants/actionTypes";
 import axios from "axios";
+import * as actionTypes from '../constants/actionTypes'
+import { CountUnpaired} from "../reducer/userRedux";
 
+import { 
+    AddNotifierReducer,
+    UpdateNotifierReducer
+}
+from '../reducer/AddNotifierReducer'
 export const AddNotifier = (formData) => async (dispatch) => {
     try {
-
-
-
         const config = {
             headers: {
                 "Content-type": "application/json",
@@ -21,21 +25,26 @@ export const AddNotifier = (formData) => async (dispatch) => {
         console.log(formData)
 
         const UserName = formData.UserName, Email = formData.Email, FirstName = formData.FirstName, LastName = formData.LastName, Phone = formData.Phone;
-        console.log(UserName)
         const { data } = await axios.post(
             "http://localhost:5000/addNotifier",
             formData ,
             config
         );
         console.log(data)
-        dispatch({ type: ADD_NOTIFIER_SUCCESS, payload: data });
+        // dispatch({ type: actionTypes.ADD_NOTIFIER_SUCCESS, payload: {
+        //     Email:data.Email,
+        //     isFetching:1
+        // } });
+        dispatch(CountUnpaired(data));
     }
     catch (error) {
-        dispatch({
-            type: ADD_NOTIFIER_FAIL,
-            payload:
-                error
+        
+          return dispatch({
+            type: actionTypes.ADD_NOTIFIER_FAIL,
+            payload:{error,isFetching:2}
         });
+        console.log(error)
+        
     }
 
 };
@@ -69,3 +78,12 @@ export const UpdateNotifier = (modalData,editId) => async (dispatch) => {
         });
     }
 }
+
+export const removeFromCart = (id) => (dispatch, getState) => {
+    dispatch({
+      type: actionTypes.REMOVE_FROM_CART,
+      payload: id,
+    });
+    // localStorage.setItem("cart", JSON.stringify(getState().cart.cartItems));
+  };
+  

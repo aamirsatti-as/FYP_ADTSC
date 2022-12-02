@@ -5,3 +5,25 @@
     align-items: center;
     float: center;
 }
+.modelNot{
+    background-color: #fff;
+}
+.modal-content{
+    background-color: #fff;
+}
+.fas{
+    color:white
+}
+/* .btn-simple{
+    margin-left: 10px;
+    align-items: center;
+}
+Button{
+    align-items: center;
+    justify-content: center;
+
+} */
+.input-group{
+    width: 30%;
+    float: right;
+}

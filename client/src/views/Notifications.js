@@ -48,7 +48,7 @@ const deleteNotification=async(d_id)=>{
 
     let result = await fetch("http://localhost:5000/getNotification");
     result = await result.json();
-    console.log(result)
+    console.log(result.Last_24Hour_Notification)
     if(result.status==404){
       const newArray={}
       setResult(newArray)
@@ -56,7 +56,7 @@ const deleteNotification=async(d_id)=>{
     }
     else{
       console.log(result.status)
-      setResult(result);
+      setResult(result.Last_24Hour_Notification);
     }
   };
   useEffect(() => {
@@ -72,12 +72,14 @@ const deleteNotification=async(d_id)=>{
           <Card.Header>
             <Card.Title as="h4">Notifications</Card.Title>
           </Card.Header>
-          {result === null ? (
+          {result.length==0 ? (
             <tr >
-              <td>No Record Exists</td>
+              <h3 style={{paddingLeft:'3%'}}>No Record Found</h3>
             </tr>
           ) : (
+            
             result.map((result ) => {
+              {/* console.log(result) */}
               // const { id, name, email } = user;
               return (
                 <Card.Body >
@@ -98,11 +100,11 @@ const deleteNotification=async(d_id)=>{
                     className="nc-icon nc-bell-55"
                   ></span>
                   <span>
-                    {result.Notification_Name} is Detected in the Live Video
+                    {result.Notification_Name} is Detected in the Live Video 
                   </span>
 
                   <span>
-                    {result.Notification_Time}
+                    {result.Notification_Area}
                   </span>
 
                   <span>

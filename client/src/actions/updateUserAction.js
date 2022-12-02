@@ -19,9 +19,10 @@ export const UpdateNotifier = (formData) => async (dispatch) => {
             "http://localhost:5000/updateUser",
             formData ,
             config
-        );
-        console.log(data)
-        dispatch({ type: UPDATE_USER_SUCCESS, payload: data });
+        ).then((data)=>{
+            console.log(data)
+            dispatch({ type: UPDATE_USER_SUCCESS, payload: data });    
+        })
     }
     catch (error) {
         dispatch({

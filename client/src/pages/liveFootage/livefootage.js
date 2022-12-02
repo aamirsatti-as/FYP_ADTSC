@@ -1,10 +1,12 @@
 import React, { useState,useEffect } from 'react'
 import './liveFootage.css';
 import { useGeolocated } from "react-geolocated";
-
+import VideoPlayer from 'react-video-js-player';
+import img from '../../assets/img/sidebar-8.jpg';
 const Livefootage = () => {
   const [latitude,setLatitude]=useState()
   const [longitude,setLongitude]=useState()
+  
   
   const [data,setData] = useState({"label":"","link":"nothing"})
 
@@ -64,9 +66,21 @@ try{
 
 
   return (
-    <div >
+    <div style={{
+      // width:"700%",
+      // height:"700%"
+      }} >
     
-        <img className='LiveFootage' src='http://20.106.75.53:8080/api/video' alt='Not showing'/>
+        {/* <img className='LiveFootage' src='http://20.106.75.53:8080/api/video' alt='Not showing'/> */}
+        <VideoPlayer
+                controls={true}
+                src='http://20.106.75.53:8080/api/video'
+                poster={img}
+                
+                width="1220%"
+                height="600%"
+              // onReady={this.onPlayerReady.bind(this)}
+              />
     </div>
   )
 }

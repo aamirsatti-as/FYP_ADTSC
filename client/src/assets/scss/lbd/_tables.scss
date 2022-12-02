@@ -26,14 +26,43 @@
 
     > thead > tr > th{
         border-bottom-width: 1px;
-        font-size: $font-size-small;
+        // font-size: $font-size-small;
+        font-size: 14px;
         text-transform: uppercase;
-        color: $dark-gray;
+        color: '#000';
         font-weight: $font-weight-normal;
+        font-weight: bold;
+        // opacity: 0.9;
+        width: 14%;
+        
         padding-bottom: 5px;
         border-top: none !important;
         border-bottom: none;
         text-align: left !important;
+    }
+    .border-1{
+        width:9%;
+    }
+    .border-2{
+        width:19%;
+    }
+    .border-3{
+        width:19%;
+    }
+    .border-4{
+        width:9%;
+        padding-left: 3%
+    }
+    .border-5{
+        width:9%;
+        padding-left: 3%
+    }
+    .border-6{
+        width:9%;
+        padding-left: 3%
+    }
+    .btnCenter{
+        padding-left: 3%
     }
 
    .td-actions .btn{

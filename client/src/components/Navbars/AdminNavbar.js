@@ -193,15 +193,13 @@ function Header() {
         toggle={() => setModal(!modal)}>
         <ModalHeader
           toggle={() => setModal(!modal)}>
-
+          <h4 className="cardTitle" style={{ color: '#fff' }}>Change Password</h4>
         </ModalHeader>
 
         <ModalBody>
           <form onSubmit={handlePassword}>
             <Row>
-              <Col lg={12}>
-                <h1>Change Password</h1>
-              </Col>
+
               <Col lg={12}>
                 <div>
                   <label htmlFor='oldPassword'>
@@ -226,10 +224,12 @@ function Header() {
                   <label htmlFor='newPassword'>
                     New Password
                   </label>
-                  <input
+                  <input style={{fontWeight:'14px', color:'black'}}
+                  
                     type='text'
                     className='form-control'
                     placeholder="Enter New Password"
+                    // color="black"
                     name='newPassword'
                     onChange={handleChange}
                     required>
@@ -246,7 +246,7 @@ function Header() {
                   <input
                     type='text'
                     className='form-control'
-                    placeholder='Enter Old Passwoasdfrd'
+                    placeholder='Enter Old Passwoasd'
                     name='cnfrmNewPassword'
                     required
                     onChange={handleChange}>
@@ -256,6 +256,8 @@ function Header() {
 
                 </div>
               </Col>
+              <Col lg={12}>
+
               <input
                 style={{
                   backgroundColor: '#1DC7EA',
@@ -272,6 +274,7 @@ function Header() {
                 type="submit"
                 value="Change Password"
               />
+              </Col>
             </Row>
           </form>
         </ModalBody>

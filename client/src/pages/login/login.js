@@ -15,45 +15,45 @@ const Login = () => {
     const dispatch=useDispatch();
     const navigate = useNavigate();
     const userLogin = useSelector((state) => state.userLogin);
-    const { loading, error, userInfo } = userLogin;
+    // const { loading, error, userInfo } = userLorgin;
   
-    const handleLogin =async (e) => {
-        e.preventDefault();
-        dispatch(login(formData.email, formData.password));    
-    }
-
-    useEffect(() => {
-        if (userInfo) {
-          navigate("/admin/dashboard");
-        }
-      }, [userInfo]);
     // const handleLogin =async (e) => {
     //     e.preventDefault();
-    //     console.log(formData)
-    //     const email=formData.email;
-    //     const password=formData.password;
-    //     const res = await fetch("http://localhost:5000/login", {
-    //         method: "POST",
-    //         headers: {
-    //           "Content-Type": "application/json",
-    //         },
-    //         body: JSON.stringify({
-    //           email,
-    //           password
-    //         }),
-    //       });
-    //       const data = await res.json();
-    //       var token=data.token;
-    //     //   console.log(data.token+"asdf")
-    //       if (res.status === 422) {
-    //         toast.error(data.message);
-    //       }
-    //       if (res.status === 200) {
-    //         toast(data.message);
-    //         localStorage.setItem('profile', JSON.stringify({ data }));
-    //         navigate('/admin/dashboard');
-    //       }
+    //      dispatch(login(formData.email, formData.password));    
     // }
+
+    // useEffect(() => {
+    //     if (userInfo) {
+    //       navigate("/admin/dashboard");
+    //     }
+    //   }, [userInfo]);
+    const handleLogin =async (e) => {
+        e.preventDefault();
+        console.log(formData)
+        const email=formData.email;
+        const password=formData.password;
+        const res = await fetch("http://localhost:5000/login", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              email,
+              password
+            }),
+          });
+          const data = await res.json();
+          var token=data.token;
+        //   console.log(data.token+"asdf")
+          if (res.status === 422) {
+            toast.error(data.message);
+          }
+          if (res.status === 200) {
+            toast(data.message);
+            localStorage.setItem('profile', JSON.stringify({ data }));
+            navigate('/admin/dashboard');
+          }
+    }
 
     const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 

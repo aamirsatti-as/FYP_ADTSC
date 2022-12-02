@@ -15,12 +15,16 @@ var DetectionSchema = new schema({
         type: String,
         required: true,
     },
-    Anomaly_Time: {
+    Anomaly_Area: {
         type: String,
         required: true,
     },
-    Traceback_Image: {
+    Traceback_Video: {
         type: String,
     },
-});
+    Detection_Video: {
+        type: String,
+    },
+},{timestamps:true}
+);
 module.exports = mongoose.model('Detection', DetectionSchema);

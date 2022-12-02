@@ -1,6 +1,21 @@
 const Admin = require("../models/admin.js")
 const Detection = require('../models/detection.js')
 const Notification = require('../models/notification.js')
+// const dotenv=require('dotenv')
+// dotenv.config()
+const dotenv = require('dotenv');
+
+dotenv.config();
+
+const accountSid = process.env.accountSid
+const authToken = process.env.authToken
+const TO_PHONE_NUMBER=process.env.TO_PHONE_NUMBER
+const FROM_PHONE_NUMBER=process.env.FROM_PHONE_NUMBER
+
+// var env=require('')
+
+// console.log(process.env)
+// console.log(process.env.authToken)
 const bcrypt = require('bcryptjs');
 const Notifiers = require('../models/notifier.js')
 const jwt = require('jsonwebtoken')
@@ -8,6 +23,7 @@ const crypto = require('crypto')
 var nodemailer = require('nodemailer');
 const sendgridTransport = require('nodemailer-sendgrid-transport')
 const Nexmo = require('nexmo');
+
 
 
 module.exports = {
@@ -134,15 +150,30 @@ module.exports = {
 
         // prints date in YYYY-MM-DD format
 
-        let Anomaly_Time
-        if (hours <= 11)
-            Anomaly_Time = hours + ":" + minutes + "AM";
-        else
-            Anomaly_Time = hours + ":" + minutes + "PM";
+        let Anomaly_Area = 'Electrical Engineering Department, Islamabad, Pakistan'
+        const latitude = 33.6518
+        const longitude = 73.1566
+        const fetch = (...args) => import('node-fetch').then(({ default: fetch }) =>
+            fetch(...args));
+        try {
+            const apiResponse = await fetch(
+                `http://api.positionstack.com/v1/reverse?access_key=a2a6d7cce8110ca44006b2249e5a48bc&query=${latitude},${longitude}`
+            )
+            var apiResponseJson = await apiResponse.json()
+            console.log(apiResponseJson)
+            if (apiResponseJson) {
+                Anomaly_Area = apiResponseJson.data[1].label;
 
+            }
+        }
+        catch (error) {
+            console.log(error)
+        }
 
-        const Anomaly_Date = year + "-" + month + "-" + date;
-        const Detect = new Detection({ Anomaly_ID, Anomaly_Name, Anomaly_Date, Anomaly_Time })
+        // var Anomaly_Date = year + "-" + month + "-" + date;
+
+        var Anomaly_Date = new Date()
+        const Detect = new Detection({ Anomaly_ID, Anomaly_Name, Anomaly_Date, Anomaly_Area })
         const save = await Detect.save()
         return res.status(201).send(save);
 
@@ -164,6 +195,7 @@ module.exports = {
         Notification_ID = Notification_ID + 1;
 
         // console.log(Detection.find().count()+1);
+        // Notification.createIndexes({"Notification_Date":1} , {expireAfterSeconds:60})
         let date_time = new Date();
 
         // get current date
@@ -187,24 +219,70 @@ module.exports = {
 
         // prints date in YYYY-MM-DD format
 
-        const Notification_Date = year + "-" + month + "-" + date;
+        // const Notification_Date = year + "-" + month + "-" + date;
+        Notification_Date = new Date()
+        let Notification_Area = 'Electrical Engineering Department, Islamabad, Pakistan'
+        const latitude = 33.6518
+        const longitude = 73.1566
 
-        let Notification_Time
-        if (hours <= 11)
-            Notification_Time = hours + ":" + minutes + "AM";
-        else
-            Notification_Time = hours + ":" + minutes + "PM";
-        const Notify = new Notification({ Notification_ID, Notification_Name, Notification_Receiver, Notification_Date, Notification_Time })
+        const fetch = (...args) => import('node-fetch').then(({ default: fetch }) =>
+            fetch(...args));
+        try {
+            const apiResponse = await fetch(
+                `http://api.positionstack.com/v1/reverse?access_key=a2a6d7cce8110ca44006b2249e5a48bc&query=${latitude},${longitude}`
+            )
+            var apiResponseJson = await apiResponse.json()
+            console.log(apiResponseJson)
+            if (apiResponseJson) {
+                Notification_Area = apiResponseJson.data[1].label;
+
+            }
+        }
+        catch (error) {
+            console.log(error)
+        }
+
+        const Notify = new Notification({ Notification_ID, Notification_Name, Notification_Receiver, Notification_Date, Notification_Area })
         const save = await Notify.save()
         return res.status(201).send(save);
 
     },
     GetNotification: async (req, res) => {
-        let notification = await Notification.find();
-        if (notification.length > 0)
-            res.status(200).send(notification)
-        else
-            res.status().send(404)
+        // let detection = await Detection.find();
+        // if (detection) {
+        //     return res.status(200).send(detection);
+        // }
+        // else {
+        //     res.status(404).send({ message: "Record Not Found" })
+        // }
+        // let notification = await Notification.find();
+        // if (notification)
+        //     res.status(200).send(notification)
+        // else
+        //     res.status().send(404)
+            try {
+
+                var Last_24Hour_Notification1 = await Notification.count({ "Notification_Date": { $lt: new Date(), $gt: new Date(new Date().getTime() - (60 * 60 * 1000 * 24)) } })
+                let Last_24Hour_Notification = await Notification.find({ "timestamp": { $lt: new Date(), $gt: new Date(new Date().getTime() - (60 * 60 * 1000 * 24)) } })
+                // const delAll = await Notification.deleteMany({})
+                // Last_24Hour_Notification.map(async (row) => {
+                //     const Notify = new Notification({ Notification_ID: row.Notification_ID, Notification_Name: row.Notification_Name, Notification_Receiver: row.Notification_Receiver, Notification_Date: row.Notification_Date, Notification_Area: row.Notification_Area })
+                //     var save = await Notify.save()
+                // });
+                Last_24Hour_Notification = await Notification.find();
+                if(Last_24Hour_Notification)
+                return res.status(200).json({Last_24Hour_Notification})
+                else
+                return res.status(404).json({ message: 'Something went wrong' })
+            }
+    
+            catch (error) {
+                console.log(error)
+                let notification = await Notification.find();
+                // if (notification)
+                // return res.status(200).json({notification})
+                return res.status(404).json({ message: 'Something went wrong' })
+            }
     },
     DeleteNotification: async (req, res) => {
         const { d_id } = req.body;
@@ -248,7 +326,7 @@ module.exports = {
         if (!find) {
             const notifier = new Notifiers({ Email, UserName, FirstName, LastName, Phone })
             const save = await notifier.save()
-            return res.status(200).json({ message: "Notifier Added Successfully" });
+            return res.status(200).send(save);
         }
     },
     GetNotifier: async (req, res) => {
@@ -281,6 +359,7 @@ module.exports = {
         console.log(req.headers)
         let TotalDetection = await Detection.count({})
         let TotalNotifier = await Notifiers.count({})
+        TotalNotifier -= 1
         let detection = await Detection.find();
 
         let date_time = new Date();
@@ -382,142 +461,155 @@ module.exports = {
 
         // let count = await Detection.count({})
         // let lastRecord=Detection.findOne({$query: {}, $orderby: {$natural : -1}})
+        const LastMinute = await Notification.find({ "Notification_Date": { $lt: new Date(), $gt: new Date(new Date().getTime() - (120000)) } })
+        console.log(LastMinute)
+        // if (LastMinute != []) {
+        //     console.log('a')
+        //     return
+
+        // }
         let lastRecord = await Detection.find().sort({ _id: -1 }).limit(1);
-        // console.log(Detection.find().count()+1);
         let date_time = new Date();
-        let lastDetectedTime = lastRecord[0].Anomaly_Time;
+        let lastDetectedTime = lastRecord[0].Anomaly_Date;
         let split = lastDetectedTime.split(':')
         let splitHour = split[0];
         let splitMinute = split[1].slice(0, -2);
         let presentHours = date_time.getHours();
 
+
         // get current minutes
         let presentMinutes = date_time.getMinutes();
         // console.log(presentHours + ' pH')
         // console.log(presentMinutes + 'pM')
-        if(presentHours==splitHour &&  presentMinutes==splitMinute)
-            return res.status(422).json({message:'record can only be saved after 1 minure'})
-        else
-        {
-        // let splitDate = split[2];
+        if (presentHours == splitHour && presentMinutes == splitMinute)
+            return res.status(422).json({ message: 'record can only be saved after 1 minure' })
+        else {
 
-        console.log(splitHour)
-        console.log(splitMinute)
+            console.log(splitHour)
+            console.log(splitMinute)
 
-        const { link, label } = req.body
-        console.log('inside live')
+            const { link, label,detection_link } = req.body
+            console.log('inside live')
 
-        const latitude = 33.6518
-        const longitude = 73.1566
-        let Anomaly_Name = label
-        let Traceback_Image = link
-        var Anomaly_ID = await Detection.count({})
-        Anomaly_ID = Anomaly_ID + 1;
-
+            const latitude = 33.6518
+            const longitude = 73.1566
+            let Anomaly_Name = label
+            let Traceback_Video = link
+            let Detection_Video=detection_link
+            var Anomaly_ID = await Detection.count({})
+            Anomaly_ID = Anomaly_ID + 1;
 
 
-        // get current date
-        // adjust 0 before single digit date
-        let date = ("0" + date_time.getDate()).slice(-2);
 
-        // get current month
-        let month = ("0" + (date_time.getMonth() + 1)).slice(-2);
+            // get current date
+            // adjust 0 before single digit date
+            let date = ("0" + date_time.getDate()).slice(-2);
 
-        // get current year
-        let year = date_time.getFullYear();
+            // get current month
+            let month = ("0" + (date_time.getMonth() + 1)).slice(-2);
 
-        // get current hours
-        let hours = date_time.getHours();
+            // get current year
+            let year = date_time.getFullYear();
 
-        // get current minutes
-        let minutes = date_time.getMinutes();
+            // get current hours
+            let hours = date_time.getHours();
 
-        // get current seconds
-        let seconds = date_time.getSeconds();
+            // get current minutes
+            let minutes = date_time.getMinutes();
 
-        // prints date in YYYY-MM-DD format
+            // get current seconds
+            let seconds = date_time.getSeconds();
 
-        let Anomaly_Time
-        if (hours <= 11)
-            Anomaly_Time = hours + ":" + minutes + "AM";
-        else
-            Anomaly_Time = hours + ":" + minutes + "PM";
+            // prints date in YYYY-MM-DD format
 
-
-        const Anomaly_Date = year + "-" + month + "-" + date;
-        const Detect = new Detection({ Anomaly_ID, Anomaly_Name, Anomaly_Date, Anomaly_Time, Traceback_Image })
-        const save = await Detect.save()
-        // return res.status(201).send(save);
-        const fetch = (...args) => import('node-fetch').then(({ default: fetch }) =>
-            fetch(...args));
-        const accountSid = 'AC6ec48faac2997017af74d647c018364d';
-        const authToken = '96bf4a0810b50254add7c2fb43b34ca5';
-        var twilio = require("twilio");
-        var client = new twilio(accountSid, authToken);
-
-
-        try {
-            const apiResponse = await fetch(
-                `http://api.positionstack.com/v1/reverse?access_key=a2a6d7cce8110ca44006b2249e5a48bc&query=${latitude},${longitude}`
-            )
-            var apiResponseJson = await apiResponse.json()
-            const Notification_Name = label;
-            const Notification_Receiver = 'Admin';
-            var Notification_ID = await Notification.count({})
-            Notification_ID = Notification_ID + 1;
-
-            const Notification_Date = year + "-" + month + "-" + date;
-
-            let Notification_Time
+            let Anomaly_Time
             if (hours <= 11)
-                Notification_Time = hours + ":" + minutes + "AM";
+                Anomaly_Time = hours + ":" + minutes + "AM";
             else
-                Notification_Time = hours + ":" + minutes + "PM";
-            const Notify = new Notification({ Notification_ID, Notification_Name, Notification_Receiver, Notification_Date, Notification_Time })
+                Anomaly_Time = hours + ":" + minutes + "PM";
 
-            await Notify.save()
-            // if(save)
-            // console.log('saved')
 
-            if (apiResponseJson) {
-                let location = apiResponseJson.data[1].label;
-                client.messages
-                    .create({
-                        body: label + " Detected At " + location,
-                        from: +18336934389,
-                        to: +923185021068,
-                    })
-                    .then((message) => {
+            // const Anomaly_Date = year + "-" + month + "-" + date;
+            const Anomaly_Date = new Date()
+            const fetch = (...args) => import('node-fetch').then(({ default: fetch }) =>
+                fetch(...args));
 
-                        console.log("sent succesfully")
-                        res.status(200).send(`The message  sent succesfully!`)
+            var Anomaly_Area = 'Electrical Engineering Department, Islamabad, Pakistan'
 
-                    }).catch((err) => {
+            try {
+                const apiResponse = await fetch(
+                    `http://api.positionstack.com/v1/reverse?access_key=a2a6d7cce8110ca44006b2249e5a48bc&query=${latitude},${longitude}`
+                )
+                var apiResponseJson = await apiResponse.json()
+                if (apiResponseJson) {
+                    Anomaly_Area = apiResponseJson.data[1].label;
+                }
+            }
+            catch (error) {
+                console.log(error)
+            }
+            const Detect = new Detection({ Anomaly_ID, Anomaly_Name, Anomaly_Date, Anomaly_Area, Traceback_Video,Detection_Video })
+            const save = await Detect.save()
 
-                        console.error("phone : ", err.message);
+            var twilio = require("twilio");
+            var client = new twilio(accountSid, authToken);
+            try {
+                const apiResponse = await fetch(
+                    `http://api.positionstack.com/v1/reverse?access_key=a2a6d7cce8110ca44006b2249e5a48bc&query=${latitude},${longitude}`
+                )
+                var apiResponseJson = await apiResponse.json()
+                const Notification_Name = label;
+                const Notification_Receiver = 'Admin';
+                var Notification_ID = await Notification.count({})
+                Notification_ID = Notification_ID + 1;
 
-                        res.status(422).send({ error: err.message });
+                const Notification_Date = new Date();
 
-                    });
+                let Notification_Area = 'Electrical Engineering Department, Islamabad, Pakistan'
+                if (apiResponseJson) {
+                    Notification_Area = apiResponseJson.data[1].label;
+                }
+                const Notify = new Notification({ Notification_ID, Notification_Name, Notification_Receiver, Notification_Date, Notification_Area })
 
+                await Notify.save()
+                if (apiResponseJson) {
+                    let location = apiResponseJson.data[1].label;
+                    client.messages
+                        .create({
+                            body: label + " Detected At " + location,
+                            from: FROM_PHONE_NUMBER,
+                            to: TO_PHONE_NUMBER,
+                        })
+                        .then((message) => {
+
+                            console.log("sent succesfully")
+                            res.status(200).send(`The message  sent succesfully!`)
+
+                        }).catch((err) => {
+
+                            console.error("phone : ", err.message);
+
+                            res.status(422).send({ error: err.message });
+
+                        });
+
+
+                }
+                else {
+                    console.log('something went wrong')
+                    return res.json({ error: err.message });
+                }
 
             }
-            else {
-                console.log('something went wrong')
-                return res.json({ error: err.message });
+            catch (err) {
+                console.log(err)
+                res.status(500).send('Something went wrong')
             }
-
         }
-        catch (err) {
-            console.log(err)
-            res.status(500).send('Something went wrong')
-        }
-    }
 
     },
-    SearchDetection : async (req, res) => {
-        const Anomaly_Name =req.body;
-        
+    SearchDetection: async (req, res) => {
+        const Anomaly_Name = req.body;
     },
     GetUpdateNotifier: async (req, res) => {
         const { e_id } = req.body;
@@ -535,13 +627,13 @@ module.exports = {
             console.log(err);
         }
     },
-    UpdateNotifier: async(req,res)=>{
+    UpdateNotifier: async (req, res) => {
         console.log(req.body)
-        const { UserName, FirstName, LastName, Phone, Email,editId } = req.body;
-        
-        
+        const { UserName, FirstName, LastName, Phone, Email, editId } = req.body;
+
+
         try {
-            const data = await Notifiers.findByIdAndUpdate({ _id: editId },{Email:Email,FirstName:FirstName,LastName:LastName,Phone:Phone,UserName:UserName},{new:true});
+            const data = await Notifiers.findByIdAndUpdate({ _id: editId }, { Email: Email, FirstName: FirstName, LastName: LastName, Phone: Phone, UserName: UserName }, { new: true });
             if (data) {
                 return res.status(200).json({ message: "Updated Successfullt" });
             }
@@ -552,6 +644,49 @@ module.exports = {
             console.log(err);
         }
 
+    },
+    AllDetectionChart: async (req, res) => {
+        try {
+            const Last_One_Hour_Detection = await Detection.count({ "Anomaly_Date": { $lt: new Date(), $gt: new Date(new Date().getTime() - (60 * 60 * 1000)) } })
+            // const Last_One_Day_Detection=await Detection.count({"Anomaly_Date":{$lt: new Date(),$gte: new Date(new Date().setDate(new Date().getDate()-(24*60 * 60 * 1000)))}})
+            // const Last_One_Day_Detection = await Detection.count({ "Anomaly_Date": { $lt: new Date(), $gt: new Date(new Date().getTime() - (60 * 60 * 1000 * 24)) } })
+            const Last_One_Day_Detection = await Detection.count({ "timestamps": { $lt: new Date(), $gte: new Date(new Date().setDate(new Date().getTime() - (60 * 60 * 1000 * 24))) } })
+            const Last_One_Week_Detection = await Detection.count({ "timestamps": { $lt: new Date(), $gte: new Date(new Date().setDate(new Date().getTime() - (86400))) } })
+            const Last_One_Month_Detection = await Detection.count({ "timestamps": { $lt: new Date(), $gte: new Date(new Date().setDate(new Date().getTime() - (60 * 60 * 1000 * 24 * 30))) } })
+            const Last_One_Year_Detection = await Detection.count({ "timestamps": { $lt: new Date(), $gte: new Date(new Date().setDate(new Date().getTime() - (60 * 60 * 1000 * 24 * 365))) } })
+            const Last_One_Month_Detection1 = await Detection.count({ "timestamps": { $lt: new Date(), $gte: new Date(new Date().setDate(new Date().getTime() - (60 * 60 * 1000 * 24 * 30))) } })
+            const TotalDetection = await Detection.count({})
+            const Pistol = await Detection.count({ Anomaly_Name: 'Pistol' });//Gun
+            const Fire = await Detection.count({ Anomaly_Name: 'Fire' });
+            const Accident = await Detection.count({ Anomaly_Name: 'Accident' });//car-crash
+            const Knife = await Detection.count({ Anomaly_Name: 'Knife' });
+            const Smoke = await Detection.count({ Anomaly_Name: 'Smoke' });
+            const Fight = await Detection.count({ Anomaly_Name: 'Fight' });
+            return res.status(200).json({ Last_One_Hour_Detection, Last_One_Day_Detection, Last_One_Week_Detection, Last_One_Month_Detection, Last_One_Year_Detection, TotalDetection, Pistol, Fire, Accident, Knife, Fight, Smoke })
+        }
+        catch (error) {
+            console.log(error)
+            return res.status(404).json({ message: 'Something went wrong' })
+        }
+
+    },
+    DeleteNotificationAfter24Hour: async (req, res) => {
+        try {
+
+            var Last_24Hour_Notification1 = await Notification.count({ "Notification_Date": { $lt: new Date(), $gt: new Date(new Date().getTime() - (60 * 60 * 1000 * 24)) } })
+            const Last_24Hour_Notification = await Notification.find({ "Notification_Date": { $lt: new Date(), $gt: new Date(new Date().getTime() - (60 * 60 * 1000 * 24)) } })
+            const delAll = await Notification.deleteMany({})
+            Last_24Hour_Notification.map(async (row) => {
+                const Notify = new Notification({ Notification_ID: row.Notification_ID, Notification_Name: row.Notification_Name, Notification_Receiver: row.Notification_Receiver, Notification_Date: row.Notification_Date, Notification_Area: row.Notification_Area })
+                var save = await Notify.save()
+            });
+            return res.send(200).json({message:'Records Updated Successfully'})
+        }
+
+        catch (error) {
+            console.log(error)
+            return res.status(404).json({ message: 'Something went wrong' })
+        }
     }
+
 }
-// <h5>click in this <a href="${EMAIL}/reset/${token}">link</a> to reset password</h5>

@@ -15,7 +15,7 @@ var NotificationSchema = new schema({
         type: String,
         required: true,
     },
-    Notification_Time: {
+    Notification_Area: {
         type: String,
         required: true,
     },
@@ -23,6 +23,7 @@ var NotificationSchema = new schema({
         type: String,
         required: true,
     },
+    
 
 });
 module.exports = mongoose.model('Notification', NotificationSchema);

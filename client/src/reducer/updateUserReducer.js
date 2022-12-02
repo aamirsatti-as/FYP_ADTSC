@@ -15,4 +15,4 @@ export const UpdateUserReducer = (state = {}, action) => {
       default:
         return state;
     }
-  };
+};

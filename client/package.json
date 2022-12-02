@@ -3,28 +3,37 @@
   "version": "2.0.1",
   "dependencies": {
     "@fortawesome/fontawesome-free": "5.15.2",
+    "@reduxjs/toolkit": "^1.9.0",
     "axios": "^0.27.2",
     "bootstrap": "^4.6.0",
+    "canvas": "^2.10.2",
+    "canvasjs": "^1.8.3",
+    "canvasjs-react-charts": "^1.0.5",
+    "chart.js": "^4.0.1",
     "chartist": "0.11.4",
     "gulp": "4.0.2",
     "gulp-append-prepend": "1.0.9",
-    "react": ">=16.8.0",
     "react-bootstrap": "^2.4.0",
     "react-chartist": "0.14.4",
-    "react-dom": ">=16.8.0",
+    "react-chartjs-2": "^5.0.1",
+    "react-dom": "^18.2.0",
     "react-file-base64": "^1.0.3",
     "react-geolocated": "^4.0.3",
     "react-notification-alert": "0.0.13",
+    "react-player": "^2.11.0",
     "react-redux": "^8.0.2",
     "react-router": "5.2.0",
     "react-router-dom": "^6.3.0",
     "react-scripts": "5.0.1",
     "react-toastify": "^9.0.7",
+    "react-video-js-player": "^1.1.1",
     "reactstrap": "^8.8.1",
     "redux": "^4.2.0",
     "redux-devtools-extension": "^2.13.9",
-    "redux-thunk": "^2.4.1",
-    "sass": "1.53.0"
+    "redux-persist": "^6.0.0",
+    "redux-thunk": "^2.4.2",
+    "sass": "1.53.0",
+    "video-react": "^0.16.0"
   },
   "overrides": {
     "autoprefixer": "10.4.5"
@@ -42,10 +51,6 @@
     "compile:scss": "sass src/assets/scss/light-bootstrap-dashboard-pro-react.scss src/assets/css/light-bootstrap-dashboard-pro-react.css",
     "minify:scss": "sass src/assets/scss/light-bootstrap-dashboard-pro-react.scss src/assets/css/light-bootstrap-dashboard-pro-react.min.css --style compressed",
     "build:scss": "npm run compile:scss && npm run minify:scss"
-  },
-  "peerDependencies": {
-    "react": ">=16.8.0",
-    "react-dom": ">=16.8.0"
   },
   "browserslist": {
     "production": [
