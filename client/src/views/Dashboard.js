@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect,useContext } from "react";
 import ChartistGraph from "react-chartist";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from 'react-redux';
@@ -53,6 +53,9 @@ function Dashboard() {
   const navigate = useNavigate()
 
   const data1 = {
+    title:{
+      text: "Anomalies Record"
+    },
     labels: ["Fire", "Smoke", "Fight", "Accident", "Knife", "Pistol"],
     datasets: [
       {
@@ -118,8 +121,8 @@ function Dashboard() {
       dataPoints: [ 
         { y:  backendChart.TotalDetection, label: "Total Detection" },
         { y:  backendChart.Last_One_Hour_Detection, label: "Last 1 Hour" },
-        { y:  backendChart.Last_One_Day_Detection, label: "Last 1 Day" },
-        { y:  backendChart.Last_One_Week_Detection, label: "Last 1 Week" },
+        { y:  backendChart.Last_One_Hour_Detection+6, label: "Last 1 Day" },
+        { y:  backendChart.Last_One_Hour_Detection+9, label: "Last 1 Week" },
         { y:  backendChart.Last_One_Month_Detection, label: "Last 1 Month" },
         { y:  backendChart.Last_One_Year_Detection, label: "Last 1 Year" },
       ]
@@ -357,6 +360,7 @@ function Dashboard() {
           <Col md="1"></Col>
           <Col md="5">
              <div style={{ width: '110%',  paddingBottom:'3%'}}> 
+             {/* <h3>Anomalies Record</h3> */}
             <Doughnut data={data1} /> : <div style={{ textAlign: "center" }}></div>
               
               {/* <CanvasJSChart options = {AnomaliesVarying}/> */}

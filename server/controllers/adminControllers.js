@@ -1,16 +1,15 @@
 const Admin = require("../models/admin.js")
 const Detection = require('../models/detection.js')
 const Notification = require('../models/notification.js')
+const Test = require('../models/test.js')
 // const dotenv=require('dotenv')
 // dotenv.config()
 const dotenv = require('dotenv');
 
 dotenv.config();
 
-const accountSid = process.env.accountSid
-const authToken = process.env.authToken
-const TO_PHONE_NUMBER=process.env.TO_PHONE_NUMBER
-const FROM_PHONE_NUMBER=process.env.FROM_PHONE_NUMBER
+const TO_PHONE_NUMBER = process.env.TO_PHONE_NUMBER
+const FROM_PHONE_NUMBER = process.env.FROM_PHONE_NUMBER
 
 // var env=require('')
 
@@ -89,7 +88,7 @@ module.exports = {
     },
 
     UpdateUser: async (req, res) => {
-        const { Company, UserName, email, FirstName, LastName, Address, City, Country, Phone, AboutMe } = req.body;
+        const { Company, UserName, email, FirstName, LastName, Address, City, Country, Phone, AboutMe, Image } = req.body;
         // const Company=req.body.Company;
         console.log(UserName)
         console.log('hi')
@@ -173,7 +172,7 @@ module.exports = {
         // var Anomaly_Date = year + "-" + month + "-" + date;
 
         var Anomaly_Date = new Date()
-        const Detect = new Detection({ Anomaly_ID, Anomaly_Name, Anomaly_Date, Anomaly_Area })
+        const Detect = new Test({ Anomaly_ID, Anomaly_Name, Anomaly_Area })
         const save = await Detect.save()
         return res.status(201).send(save);
 
@@ -260,29 +259,29 @@ module.exports = {
         //     res.status(200).send(notification)
         // else
         //     res.status().send(404)
-            try {
+        try {
 
-                var Last_24Hour_Notification1 = await Notification.count({ "Notification_Date": { $lt: new Date(), $gt: new Date(new Date().getTime() - (60 * 60 * 1000 * 24)) } })
-                let Last_24Hour_Notification = await Notification.find({ "timestamp": { $lt: new Date(), $gt: new Date(new Date().getTime() - (60 * 60 * 1000 * 24)) } })
-                // const delAll = await Notification.deleteMany({})
-                // Last_24Hour_Notification.map(async (row) => {
-                //     const Notify = new Notification({ Notification_ID: row.Notification_ID, Notification_Name: row.Notification_Name, Notification_Receiver: row.Notification_Receiver, Notification_Date: row.Notification_Date, Notification_Area: row.Notification_Area })
-                //     var save = await Notify.save()
-                // });
-                Last_24Hour_Notification = await Notification.find();
-                if(Last_24Hour_Notification)
-                return res.status(200).json({Last_24Hour_Notification})
-                else
+            var Last_24Hour_Notification1 = await Notification.count({ "Notification_Date": { $lt: new Date(), $gt: new Date(new Date().getTime() - (60 * 60 * 1000 * 24)) } })
+            let Last_24Hour_Notification = await Notification.find({ "timestamp": { $lt: new Date(), $gt: new Date(new Date().getTime() - (60 * 60 * 1000 * 24)) } })
+            // const delAll = await Notification.deleteMany({})
+            // Last_24Hour_Notification.map(async (row) => {
+            //     const Notify = new Notification({ Notification_ID: row.Notification_ID, Notification_Name: row.Notification_Name, Notification_Receiver: row.Notification_Receiver, Notification_Date: row.Notification_Date, Notification_Area: row.Notification_Area })
+            //     var save = await Notify.save()
+            // });
+            Last_24Hour_Notification = await Notification.find();
+            if (Last_24Hour_Notification)
+                return res.status(200).json({ Last_24Hour_Notification })
+            else
                 return res.status(404).json({ message: 'Something went wrong' })
-            }
-    
-            catch (error) {
-                console.log(error)
-                let notification = await Notification.find();
-                // if (notification)
-                // return res.status(200).json({notification})
-                return res.status(404).json({ message: 'Something went wrong' })
-            }
+        }
+
+        catch (error) {
+            console.log(error)
+            let notification = await Notification.find();
+            // if (notification)
+            // return res.status(200).json({notification})
+            return res.status(404).json({ message: 'Something went wrong' })
+        }
     },
     DeleteNotification: async (req, res) => {
         const { d_id } = req.body;
@@ -319,14 +318,18 @@ module.exports = {
         // FirstName, LastName, Phone, Email, UserName, 
         const { FirstName, LastName, Phone, Email, UserName } = req.body;
         console.log(FirstName, LastName, Phone, Email, UserName)
-        const find = await Notifiers.findOne({ Email: Email });
-        if (find) {
-            return res.status(422).json({ message: 'Notifier already exist' });
+        const emailFind = await Notifiers.findOne({ Email: Email });
+        if (emailFind) {
+            return res.json({ message: 'Email already exist' });
         }
-        if (!find) {
+        const phoneFind = await Notifiers.findOne({ Phone: Phone })
+        if (phoneFind) {
+            return res.json({ message: 'Phone Number already exist' });
+        }
+        if (!phoneFind && !emailFind) {
             const notifier = new Notifiers({ Email, UserName, FirstName, LastName, Phone })
             const save = await notifier.save()
-            return res.status(200).send(save);
+            return res.status(200).json({ message: 'Notifier Added Successfully' });
         }
     },
     GetNotifier: async (req, res) => {
@@ -461,7 +464,9 @@ module.exports = {
 
         // let count = await Detection.count({})
         // let lastRecord=Detection.findOne({$query: {}, $orderby: {$natural : -1}})
-        const LastMinute = await Notification.find({ "Notification_Date": { $lt: new Date(), $gt: new Date(new Date().getTime() - (120000)) } })
+        // const LastMinute = await Notification.find({ "Notification_Date": { $lt: new Date(), $gt: new Date(new Date().getTime() - (60 * 60 * 1000)) } })
+        const LastMinute = await Detection.count({ "Anomaly_Date": { $lt: new Date(), $gt: new Date(new Date().getTime() - (60 * 60 * 1000)) } })
+
         console.log(LastMinute)
         // if (LastMinute != []) {
         //     console.log('a')
@@ -470,37 +475,39 @@ module.exports = {
         // }
         let lastRecord = await Detection.find().sort({ _id: -1 }).limit(1);
         let date_time = new Date();
-        let lastDetectedTime = lastRecord[0].Anomaly_Date;
-        let split = lastDetectedTime.split(':')
-        let splitHour = split[0];
-        let splitMinute = split[1].slice(0, -2);
-        let presentHours = date_time.getHours();
+        // let lastDetectedTime = lastRecord[0].Anomaly_Date;
+        // let split = lastDetectedTime.split(':')
+        // let splitHour = split[0];
+        // let splitMinute = split[1].slice(0, -2);
+        // let presentHours = date_time.getHours();
 
 
         // get current minutes
-        let presentMinutes = date_time.getMinutes();
+        // let presentMinutes = date_time.getMinutes();
         // console.log(presentHours + ' pH')
         // console.log(presentMinutes + 'pM')
-        if (presentHours == splitHour && presentMinutes == splitMinute)
-            return res.status(422).json({ message: 'record can only be saved after 1 minure' })
-        else {
+        // if (presentHours == splitHour && presentMinutes == splitMinute)
+        //     return res.status(422).json({ message: 'record can only be saved after 1 minure' })
+        // else {
 
-            console.log(splitHour)
-            console.log(splitMinute)
+            // console.log(splitHour)
+            // console.log(splitMinute)
 
-            const { link, label,detection_link } = req.body
+            const { link, label, detection } = req.body
+            console.log(link)
+            console.log(label)
+            console.log(detection)
+            if (!link || !label || !detection)
+                return
             console.log('inside live')
 
             const latitude = 33.6518
             const longitude = 73.1566
             let Anomaly_Name = label
             let Traceback_Video = link
-            let Detection_Video=detection_link
+            let Detection_Video = detection
             var Anomaly_ID = await Detection.count({})
             Anomaly_ID = Anomaly_ID + 1;
-
-
-
             // get current date
             // adjust 0 before single digit date
             let date = ("0" + date_time.getDate()).slice(-2);
@@ -548,10 +555,12 @@ module.exports = {
             catch (error) {
                 console.log(error)
             }
-            const Detect = new Detection({ Anomaly_ID, Anomaly_Name, Anomaly_Date, Anomaly_Area, Traceback_Video,Detection_Video })
+            const Detect = new Detection({ Anomaly_ID, Anomaly_Name, Anomaly_Date, Anomaly_Area, Traceback_Video, Detection_Video })
             const save = await Detect.save()
 
             var twilio = require("twilio");
+            const accountSid = process.env.new_ACCOUNT_SID            
+            const authToken = process.env.new_AUTH_TOKEN
             var client = new twilio(accountSid, authToken);
             try {
                 const apiResponse = await fetch(
@@ -572,24 +581,28 @@ module.exports = {
                 const Notify = new Notification({ Notification_ID, Notification_Name, Notification_Receiver, Notification_Date, Notification_Area })
 
                 await Notify.save()
+                console.log('a')
                 if (apiResponseJson) {
                     let location = apiResponseJson.data[1].label;
+                    // body: label + " Detected At " + location,
+                            
                     client.messages
                         .create({
-                            body: label + " Detected At " + location,
-                            from: FROM_PHONE_NUMBER,
-                            to: TO_PHONE_NUMBER,
+                            body:'adf',
+                            from: +15134504449,
+                            to: +923010511797,
                         })
                         .then((message) => {
 
                             console.log("sent succesfully")
-                            res.status(200).send(`The message  sent succesfully!`)
+                            
+                            res.status(200).send(message)
 
                         }).catch((err) => {
 
                             console.error("phone : ", err.message);
 
-                            res.status(422).send({ error: err.message });
+                            res.send({ error: err.message });
 
                         });
 
@@ -604,7 +617,6 @@ module.exports = {
             catch (err) {
                 console.log(err)
                 res.status(500).send('Something went wrong')
-            }
         }
 
     },
@@ -635,7 +647,7 @@ module.exports = {
         try {
             const data = await Notifiers.findByIdAndUpdate({ _id: editId }, { Email: Email, FirstName: FirstName, LastName: LastName, Phone: Phone, UserName: UserName }, { new: true });
             if (data) {
-                return res.status(200).json({ message: "Updated Successfullt" });
+                return res.status(200).json({ message: "Updated Successfully" });
             }
             else {
                 return res.status(422).json({ message: "Something Went wrong.Try Again" });
@@ -647,11 +659,48 @@ module.exports = {
     },
     AllDetectionChart: async (req, res) => {
         try {
-            const Last_One_Hour_Detection = await Detection.count({ "Anomaly_Date": { $lt: new Date(), $gt: new Date(new Date().getTime() - (60 * 60 * 1000)) } })
+            const Last_One_Hour_Detection = await Detection.count({ "timestamps": { $lt: new Date(), $gt: new Date(new Date().getTime() - (60 * 60 * 1000)) } })
             // const Last_One_Day_Detection=await Detection.count({"Anomaly_Date":{$lt: new Date(),$gte: new Date(new Date().setDate(new Date().getDate()-(24*60 * 60 * 1000)))}})
             // const Last_One_Day_Detection = await Detection.count({ "Anomaly_Date": { $lt: new Date(), $gt: new Date(new Date().getTime() - (60 * 60 * 1000 * 24)) } })
+            // const t=await Detection.count({ "Anomaly_Date": { $lt: new Date().getTime(), $gte: 400}})
+            // const t=await Detection.find({timestamp:{$gt: new Date(ISODate("2022-12-03T10:34:51.078+00:00")-60*60000)}})
+            var lastHour = new Date();
+            lastHour.setHours(lastHour.getHours() - 1);
+
+            // const t=await Anomaly_Date.aggregate(
+            //     { $match: { "createdAt": { $gt: lastHour }, } },
+            //     { $project: { "createdAt": 1, "createdAt_Minutes": { $minute: "$createdAt" }, "tweets": 1, } },
+            //     { $group: { "_id": "$createdAt_Minutes", "sum_tweets": { $sum: "$tweets" } } }
+            // )
+            Detection.aggregate([
+
+                {
+                    $group: {
+                        _id: { $dateToString: { format: "%M", date: "$createdAt" } },
+                        Totaluser: { $sum: 1 }
+                    }
+                },
+            ],
+
+                function (err, result) {
+                    let count = 0
+                    if (err) {
+                        res.send(err);
+                    } else {
+
+                        console.log(result.map((ar) => {
+                            count += 1;
+                        }))
+
+                        res.json(count);
+                    }
+                }
+            );
+            // res.status(200).json(result);
+
+            // console.log(new Date().getTime())
             const Last_One_Day_Detection = await Detection.count({ "timestamps": { $lt: new Date(), $gte: new Date(new Date().setDate(new Date().getTime() - (60 * 60 * 1000 * 24))) } })
-            const Last_One_Week_Detection = await Detection.count({ "timestamps": { $lt: new Date(), $gte: new Date(new Date().setDate(new Date().getTime() - (86400))) } })
+            const Last_One_Week_Detection = await Detection.count({ "timestamps": { $lt: new Date(), $gte: new Date(new Date().setDate(new Date().getTime() - (60 * 60 * 1000 * 24 * 7))) } })
             const Last_One_Month_Detection = await Detection.count({ "timestamps": { $lt: new Date(), $gte: new Date(new Date().setDate(new Date().getTime() - (60 * 60 * 1000 * 24 * 30))) } })
             const Last_One_Year_Detection = await Detection.count({ "timestamps": { $lt: new Date(), $gte: new Date(new Date().setDate(new Date().getTime() - (60 * 60 * 1000 * 24 * 365))) } })
             const Last_One_Month_Detection1 = await Detection.count({ "timestamps": { $lt: new Date(), $gte: new Date(new Date().setDate(new Date().getTime() - (60 * 60 * 1000 * 24 * 30))) } })
@@ -662,7 +711,9 @@ module.exports = {
             const Knife = await Detection.count({ Anomaly_Name: 'Knife' });
             const Smoke = await Detection.count({ Anomaly_Name: 'Smoke' });
             const Fight = await Detection.count({ Anomaly_Name: 'Fight' });
-            return res.status(200).json({ Last_One_Hour_Detection, Last_One_Day_Detection, Last_One_Week_Detection, Last_One_Month_Detection, Last_One_Year_Detection, TotalDetection, Pistol, Fire, Accident, Knife, Fight, Smoke })
+            return
+            // return res.status(200).json({ Last_One_Hour_Detection, Last_One_Day_Detection, Last_One_Week_Detection, Last_One_Month_Detection, Last_One_Year_Detection, TotalDetection, Pistol, Fire, Accident, Knife, Fight, Smoke })
+            // return res.status(200).json({ Fight })
         }
         catch (error) {
             console.log(error)
@@ -680,7 +731,7 @@ module.exports = {
                 const Notify = new Notification({ Notification_ID: row.Notification_ID, Notification_Name: row.Notification_Name, Notification_Receiver: row.Notification_Receiver, Notification_Date: row.Notification_Date, Notification_Area: row.Notification_Area })
                 var save = await Notify.save()
             });
-            return res.send(200).json({message:'Records Updated Successfully'})
+            return res.send(200).json({ message: 'Records Updated Successfully' })
         }
 
         catch (error) {

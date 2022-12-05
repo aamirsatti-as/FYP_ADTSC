@@ -87,10 +87,10 @@ function Notifier() {
 
     const postNotifier = async (e) => {
         e.preventDefault()
-        dispatch(AddNotifier(formData)).then(()=>{
-            console.log('asdfasd')
-            setCheck(true)
-        })
+        // dispatch(AddNotifier(formData)).then(()=>{
+        //     console.log('asdfasd')
+        //     setCheck(true)
+        // })
         
 
         // testFun()
@@ -108,6 +108,12 @@ function Notifier() {
         //         }
 
         //    })
+
+        const response = await axios.post('http://localhost:5000/addNotifier', formData)
+        // console.log(response.data.message)
+        toast(response.data.message)
+        fetchData()
+        
 
     }
     const handleSearch = async () => {
@@ -154,18 +160,21 @@ function Notifier() {
     const submitEditInformation = async (e) => {
 
         e.preventDefault()
-        dispatch(UpdateNotifier(modalData, editId));
-        fetchData()
+        // dispatch(UpdateNotifier(modalData, editId));
+        
         setModal(false)
         // const UpdateNotifierState = useSelector((state) => state.updateNotifier);
         // console.log(UpdateNotifierState,'  jh')
+        const UserName=modalData.UserName,Email=modalData.Email,Phone=modalData.Phone,FirstName=modalData.FirstName,LastName=modalData.LastName;
 
-        // if(editId)
-        // {
-        //     const res=await axios.put('http://localhost:5000/updateNotifier',{UserName,Email,Phone,FirstName,LastName,editId})  
-        //     console.log(res)      
+        if(editId)
+        {
+            const res=await axios.put('http://localhost:5000/updateNotifier',{UserName,Email,Phone,FirstName,LastName,editId})  
+            console.log(res.data)
+            toast(res.data.message) 
+            fetchData()
 
-        // }
+        }
     }
 
 

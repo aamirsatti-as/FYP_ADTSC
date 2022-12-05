@@ -41,6 +41,7 @@ try{
             body: JSON.stringify({
               link,
               label,
+              detection,
               
               
             }),
@@ -71,16 +72,14 @@ try{
       // height:"700%"
       }} >
     
-        {/* <img className='LiveFootage' src='http://20.106.75.53:8080/api/video' alt='Not showing'/> */}
-        <VideoPlayer
+        <img className='LiveFootage' src='http://20.106.75.53:8080/api/video' alt='Not showing'/>
+        {/* <VideoPlayer
                 controls={true}
                 src='http://20.106.75.53:8080/api/video'
                 poster={img}
-                
                 width="1220%"
                 height="600%"
-              // onReady={this.onPlayerReady.bind(this)}
-              />
+              /> */}
     </div>
   )
 }
