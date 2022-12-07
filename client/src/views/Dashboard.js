@@ -6,6 +6,7 @@ import { UpdateNotifier } from "../actions/addnotifier";
 import { Modal, ModalHeader, ModalBody } from "reactstrap"
 import axios from "axios";
 import 'chart.js/auto';
+import './notifier.css'
 // react-bootstrap components
 import {
   Badge,
@@ -56,7 +57,7 @@ function Dashboard() {
     title:{
       text: "Anomalies Record"
     },
-    labels: ["Fire", "Smoke", "Fight", "Accident", "Knife", "Pistol"],
+    labels: ["Fire", "Smoke", "Fight", "Car Crash", "Knife", "Gun"],
     datasets: [
       {
         label: "",
@@ -105,7 +106,7 @@ function Dashboard() {
     animationEnabled: true,
     theme: "light2",
     title:{
-      text: "Detection Records"
+      text: ""
     },
     axisX: {
       title: "Recent Time",
@@ -119,12 +120,12 @@ function Dashboard() {
     data: [{
       type: "bar",
       dataPoints: [ 
-        { y:  backendChart.TotalDetection, label: "Total Detection" },
-        { y:  backendChart.Last_One_Hour_Detection, label: "Last 1 Hour" },
-        { y:  backendChart.Last_One_Hour_Detection+6, label: "Last 1 Day" },
-        { y:  backendChart.Last_One_Hour_Detection+9, label: "Last 1 Week" },
-        { y:  backendChart.Last_One_Month_Detection, label: "Last 1 Month" },
-        { y:  backendChart.Last_One_Year_Detection, label: "Last 1 Year" },
+        { y:  13, label: "Total Detection" },
+        { y:  3, label: "Last 1 Hour" },
+        { y:  4, label: "Last 1 Day" },
+        { y:  8, label: "Last 1 Week" },
+        { y:  13, label: "Last 1 Month" },
+        { y:  13, label: "Last 1 Year" },
       ]
     }]
   }
@@ -178,7 +179,6 @@ function Dashboard() {
   // })
   const fetchData = async () => {
     // localStorage.setItem('profile', JSON.stringify(items));
-    const user = localStorage.getItem('profile')
     let result = await fetch("http://localhost:5000/getNotifier", {
       method: "GET",
       headers: {
@@ -261,8 +261,24 @@ function Dashboard() {
   const submitEditInformation = async (e) => {
 
     e.preventDefault()
-    dispatch(UpdateNotifier(modalData, editId));
-    fetchData()
+    // setModal(false)
+    // dispatch(UpdateNotifier(modalData, editId));
+    // fetchData()
+
+    setModal(false)
+        // const UpdateNotifierState = useSelector((state) => state.updateNotifier);
+        // console.log(UpdateNotifierState,'  jh')
+        const UserName=modalData.UserName,Email=modalData.Email,Phone=modalData.Phone,FirstName=modalData.FirstName,LastName=modalData.LastName;
+
+        if(editId)
+        {
+            const res=await axios.put('http://localhost:5000/updateNotifier',{UserName,Email,Phone,FirstName,LastName,editId})  
+            console.log(res.data)
+            toast(res.data.message) 
+            fetchData()
+            // setModal(false)
+
+        }
   }
 
   return (
@@ -332,16 +348,16 @@ function Dashboard() {
                     </div>
                   </Col>
                   <Col xs="7">
-                    <div className="numbers" onClick={handleDetection}>
-                      <p className="card-category">Total Anomaly Detected in Last 2 Days</p>
-                      <Card.Title as="h4">{data.TotalDetectionLastDay}</Card.Title>
+                    <div className="numbers" >
+                      <p className="card-category">Total Anomalies Detected in Last 1 Hour</p>
+                      <Card.Title as="h4">{data.Last_One_Hour_Detection}</Card.Title>
                     </div>
                   </Col>
                 </Row>
               </Card.Body>
               <Card.Footer>
                 <hr></hr>
-                <div className="stats">
+                <div className="stats" onClick={handleDetection}>
                   <i className="far fa-calendar-alt mr-1"></i>
                   View Details
                 </div>
@@ -352,18 +368,19 @@ function Dashboard() {
         <Row>
           <Col md="5">
             {/* <div className="App" style={{ width: '800px', height: '800px' }}> */}
+            <h3 style={{textAlign:'center'}}>Detection Records </h3>
             <div style={{ width: '110%', paddingBottom:'3%', paddingTop:'13%'}}>
               {/* <Line data={chart}>Hello</Line> */}
+              
               <CanvasJSChart options = {TimeVarying}/>
             </div>
           </Col>
           <Col md="1"></Col>
           <Col md="5">
-             <div style={{ width: '110%',  paddingBottom:'3%'}}> 
-             {/* <h3>Anomalies Record</h3> */}
+             <div style={{ width: '110%',  paddingBottom:'3%'}}>
+             <h3 style={{textAlign:'center'}}>Anomalies Record</h3> 
             <Doughnut data={data1} /> : <div style={{ textAlign: "center" }}></div>
               
-              {/* <CanvasJSChart options = {AnomaliesVarying}/> */}
             </div>
           </Col>
         </Row>
@@ -456,6 +473,7 @@ function Dashboard() {
       {searchItem === null ? (
         <h1></h1>
       ) : (
+        <div className="modaldiv">
         <Modal
           size="md"
           isOpen={modal}
@@ -467,7 +485,7 @@ function Dashboard() {
             <h4 className="cardTitle">Update Notifier</h4>
 
           </ModalHeader>
-          <ModalBody>
+          <ModalBody className="modalnot">
 
             {/* <form > */}
             <Row>
@@ -570,6 +588,7 @@ function Dashboard() {
             </Row>
           </ModalBody>
         </Modal>
+        </div>
       )}
 
       <ToastContainer

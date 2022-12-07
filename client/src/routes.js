@@ -51,7 +51,7 @@ const dashboardRoutes = [
   {
     path: "/detection",
     name: "Detection",
-    icon: "nc-icon nc-notes",
+    icon: "nc-icon nc-paper-2",
     component: Detection,
     layout: "/admin"
   },
@@ -72,7 +72,7 @@ const dashboardRoutes = [
   {
     path: "/notifiers",
     name: "Notifiers",
-    icon: "nc-icon nc-pin-3",
+    icon: "nc-icon nc-notes",
     component: Notifiers,
     layout: "/admin"
   },

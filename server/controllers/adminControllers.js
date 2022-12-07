@@ -2,11 +2,13 @@ const Admin = require("../models/admin.js")
 const Detection = require('../models/detection.js')
 const Notification = require('../models/notification.js')
 const Test = require('../models/test.js')
+const OTP = require('../models/otp.js')
 // const dotenv=require('dotenv')
 // dotenv.config()
 const dotenv = require('dotenv');
 
 dotenv.config();
+const nodemailer = require("nodemailer");
 
 const TO_PHONE_NUMBER = process.env.TO_PHONE_NUMBER
 const FROM_PHONE_NUMBER = process.env.FROM_PHONE_NUMBER
@@ -19,7 +21,6 @@ const bcrypt = require('bcryptjs');
 const Notifiers = require('../models/notifier.js')
 const jwt = require('jsonwebtoken')
 const crypto = require('crypto')
-var nodemailer = require('nodemailer');
 const sendgridTransport = require('nodemailer-sendgrid-transport')
 const Nexmo = require('nexmo');
 
@@ -28,6 +29,7 @@ const Nexmo = require('nexmo');
 module.exports = {
 
     login: async (req, res) => {
+        console.log('ad')
 
         const { email, password } = req.body;
 
@@ -120,7 +122,7 @@ module.exports = {
     },
     Detection_: async (req, res) => {
 
-        const { Anomaly_Name } = req.body;
+        const { Anomaly_Name,Traceback_Video,Detection_Video } = req.body;
 
         var Anomaly_ID = await Detection.count({})
         Anomaly_ID = Anomaly_ID + 1;
@@ -172,7 +174,7 @@ module.exports = {
         // var Anomaly_Date = year + "-" + month + "-" + date;
 
         var Anomaly_Date = new Date()
-        const Detect = new Test({ Anomaly_ID, Anomaly_Name, Anomaly_Area })
+        const Detect = new Detection({ Anomaly_ID, Anomaly_Name, Anomaly_Area, Anomaly_Date,Traceback_Video,Detection_Video })
         const save = await Detect.save()
         return res.status(201).send(save);
 
@@ -246,57 +248,75 @@ module.exports = {
         return res.status(201).send(save);
 
     },
-    GetNotification: async (req, res) => {
-        // let detection = await Detection.find();
-        // if (detection) {
-        //     return res.status(200).send(detection);
-        // }
-        // else {
-        //     res.status(404).send({ message: "Record Not Found" })
-        // }
-        // let notification = await Notification.find();
-        // if (notification)
-        //     res.status(200).send(notification)
-        // else
-        //     res.status().send(404)
+    DeleteNotification: async (Req, res) => {
         try {
+            console.log('a')
+            let Last_Hour = await Notification.find({ "Notification_Date": { $lt: new Date(), $gt: new Date(new Date().getTime() - (60 * 60 * 1000)) } })
+            console.log(Last_Hour)
+            // var Last_24Hour_Notification1 = await Notification.count({ "Notification_Date": { $lt: new Date(), $gt: new Date(new Date().getTime() - (60 * 60 * 1000 * 24)) } })
+            // let Last_24Hour_Notification = await Notification.find({ "timestamp": { $lt: new Date(), $gt: new Date(new Date().getTime() - (60 * 60 * 1000 * 24)) } })
+            const delAll = await Notification.deleteMany({})
+            
+            Last_Hour.map(async (row) => {
+                const Notify = new Notification({ Notification_ID: row.Notification_ID, Notification_Name: row.Notification_Name, Notification_Receiver: row.Notification_Receiver, Notification_Date: row.Notification_Date, Notification_Area: row.Notification_Area })
+                // const data = await Notifiers.findByIdAndUpdate({ _id: row._id }, { Email: Email, FirstName: FirstName, LastName: LastName, Phone: Phone, UserName: UserName }, { new: true });
 
-            var Last_24Hour_Notification1 = await Notification.count({ "Notification_Date": { $lt: new Date(), $gt: new Date(new Date().getTime() - (60 * 60 * 1000 * 24)) } })
-            let Last_24Hour_Notification = await Notification.find({ "timestamp": { $lt: new Date(), $gt: new Date(new Date().getTime() - (60 * 60 * 1000 * 24)) } })
-            // const delAll = await Notification.deleteMany({})
-            // Last_24Hour_Notification.map(async (row) => {
-            //     const Notify = new Notification({ Notification_ID: row.Notification_ID, Notification_Name: row.Notification_Name, Notification_Receiver: row.Notification_Receiver, Notification_Date: row.Notification_Date, Notification_Area: row.Notification_Area })
-            //     var save = await Notify.save()
-            // });
-            Last_24Hour_Notification = await Notification.find();
-            if (Last_24Hour_Notification)
-                return res.status(200).json({ Last_24Hour_Notification })
-            else
-                return res.status(404).json({ message: 'Something went wrong' })
+                var save = await Notify.save()
+            })
+            res.json({"msg":"ok"})
         }
-
         catch (error) {
             console.log(error)
-            let notification = await Notification.find();
-            // if (notification)
-            // return res.status(200).json({notification})
-            return res.status(404).json({ message: 'Something went wrong' })
+            return res.json({ message: 'Something went wrong' })
         }
     },
-    DeleteNotification: async (req, res) => {
-        const { d_id } = req.body;
-        try {
-            const data = await Notification.deleteOne({ _id: d_id });
-            if (data) {
-                return res.status(200).json({ message: "Record Deleted Successfully" });
-            }
-            else {
-                return res.status(422).json({ error: "Try Again" });
-            }
-        } catch (err) {
-            console.log(err);
-        }
+    GetNotification: async (req, res) => {
+        
+        let notification = await Notification.find();
+        if (notification)
+            res.status(200).json({notification})
+        else
+            res.json({"msg":"something went wrong"})
+
+
+        // try {
+
+        //     var Last_24Hour_Notification1 = await Notification.count({ "Notification_Date": { $lt: new Date(), $gt: new Date(new Date().getTime() - (60 * 60 * 1000 * 24)) } })
+        //     let Last_24Hour_Notification = await Notification.find({ "timestamp": { $lt: new Date(), $gt: new Date(new Date().getTime() - (60 * 60 * 1000 * 24)) } })
+        //     // const delAll = await Notification.deleteMany({})
+        //     // Last_24Hour_Notification.map(async (row) => {
+        //     //     const Notify = new Notification({ Notification_ID: row.Notification_ID, Notification_Name: row.Notification_Name, Notification_Receiver: row.Notification_Receiver, Notification_Date: row.Notification_Date, Notification_Area: row.Notification_Area })
+        //     //     var save = await Notify.save()
+        //     // });
+        //     Last_24Hour_Notification = await Notification.find();
+        //     if (Last_24Hour_Notification)
+        //         return res.status(200).json({ Last_24Hour_Notification })
+        //     else
+        //         return res.status(404).json({ message: 'Something went wrong' })
+        // }
+
+        // catch (error) {
+        //     console.log(error)
+        //     let notification = await Notification.find();
+        //     // if (notification)
+        //     // return res.status(200).json({notification})
+        //     return res.status(404).json({ message: 'Something went wrong' })
+        // }
     },
+    // DeleteNotification: async (req, res) => {
+    //     const { d_id } = req.body;
+    //     try {
+    //         const data = await Notification.deleteOne({ _id: d_id });
+    //         if (data) {
+    //             return res.status(200).json({ message: "Record Deleted Successfully" });
+    //         }
+    //         else {
+    //             return res.status(422).json({ error: "Try Again" });
+    //         }
+    //     } catch (err) {
+    //         console.log(err);
+    //     }
+    // },
     DeleteDetection: async (req, res) => {
 
         const { d_id } = req.body;
@@ -364,6 +384,7 @@ module.exports = {
         let TotalNotifier = await Notifiers.count({})
         TotalNotifier -= 1
         let detection = await Detection.find();
+        const Last_One_Hour_Detection = await Notification.count({ "Notification_Date": { $lt: new Date(), $gt: new Date(new Date().getTime() - (60 * 60 * 1000)) } })
 
         let date_time = new Date();
 
@@ -374,56 +395,56 @@ module.exports = {
         let year = date_time.getFullYear();
 
         let TotalDetectionLastDay = 0;
-        detection.map((response) => {
-            let split = response.Anomaly_Date.split('-')
-            let splitYear = split[0];
-            let splitMonth = split[1];
-            let splitDate = split[2];
+        // detection.map((response) => {
+        //     let split = response.Anomaly_Date.split('-')
+        //     let splitYear = split[0];
+        //     let splitMonth = split[1];
+        //     let splitDate = split[2];
 
-            if (year == splitYear) {
-                if (splitMonth == month) {
-                    if (splitDate == date) {
-                        TotalDetectionLastDay += 1;
-                    }
-                    if (date - parseInt(splitDate) == '1') {
-                        TotalDetectionLastDay += 1;
-                    }
-                }
-                if (month % 2 != 0) {
-                    if (splitMonth == '1' || splitMonth == '3' || splitMonth == ' 5' || splitMonth == '7') {
-                        if (splitDate == '31' && date == '1') {
-                            TotalDetectionLastDay += 1;
-                        }
-                    }
-                    if (splitMonth == '9' || splitMonth == '11') {
-                        if (splitDate == '30' && date == '1') {
-                            TotalDetectionLastDay += 1;
-                        }
-                    }
-                }
-                else if (month % 2 == 0) {
-                    if (splitMonth == '2') {
-                        if (splitDate == '29' && date == '1') {
-                            TotalDetectionLastDay += 1;
-                        }
-                        if (splitDate == '28' && date == '1') {
-                            TotalDetectionLastDay += 1;
-                        }
-                    }
-                    if (splitMonth == '4' || splitMonth == '6') {
-                        if (splitDate == '30' && date == '1') {
-                            TotalDetectionLastDay += 1;
-                        }
-                    }
-                    if (splitMonth == '8' || splitMonth == '10') {
-                        if (splitDate == '31' && date == '1') {
-                            TotalDetectionLastDay += 1;
-                        }
-                    }
-                }
-            }
-        })
-        res.status(200).json({ TotalDetection, TotalNotifier, TotalDetectionLastDay })
+        // if (year == splitYear) {
+        //     if (splitMonth == month) {
+        //         if (splitDate == date) {
+        //             TotalDetectionLastDay += 1;
+        //         }
+        //         if (date - parseInt(splitDate) == '1') {
+        //             TotalDetectionLastDay += 1;
+        //         }
+        //     }
+        //     if (month % 2 != 0) {
+        //         if (splitMonth == '1' || splitMonth == '3' || splitMonth == ' 5' || splitMonth == '7') {
+        //             if (splitDate == '31' && date == '1') {
+        //                 TotalDetectionLastDay += 1;
+        //             }
+        //         }
+        //         if (splitMonth == '9' || splitMonth == '11') {
+        //             if (splitDate == '30' && date == '1') {
+        //                 TotalDetectionLastDay += 1;
+        //             }
+        //         }
+        //     }
+        //     else if (month % 2 == 0) {
+        //         if (splitMonth == '2') {
+        //             if (splitDate == '29' && date == '1') {
+        //                 TotalDetectionLastDay += 1;
+        //             }
+        //             if (splitDate == '28' && date == '1') {
+        //                 TotalDetectionLastDay += 1;
+        //             }
+        //         }
+        //         if (splitMonth == '4' || splitMonth == '6') {
+        //             if (splitDate == '30' && date == '1') {
+        //                 TotalDetectionLastDay += 1;
+        //             }
+        //         }
+        //         if (splitMonth == '8' || splitMonth == '10') {
+        //             if (splitDate == '31' && date == '1') {
+        //                 TotalDetectionLastDay += 1;
+        //             }
+        //         }
+        //     }
+        // }
+        // })
+        res.status(200).json({ TotalDetection, TotalNotifier, Last_One_Hour_Detection })
     },
     ResetPassword: (req, res) => {
         const EMAIL = 'aamirsatti507@gmail.com'
@@ -465,16 +486,39 @@ module.exports = {
         // let count = await Detection.count({})
         // let lastRecord=Detection.findOne({$query: {}, $orderby: {$natural : -1}})
         // const LastMinute = await Notification.find({ "Notification_Date": { $lt: new Date(), $gt: new Date(new Date().getTime() - (60 * 60 * 1000)) } })
-        const LastMinute = await Detection.count({ "Anomaly_Date": { $lt: new Date(), $gt: new Date(new Date().getTime() - (60 * 60 * 1000)) } })
+        // const LastMinute = await Detection.count({ "Anomaly_Date": { $lt: new Date(), $gt: new Date(new Date().getTime() - (60 * 60 * 1000)) } })
 
-        console.log(LastMinute)
+        // console.log(LastMinute)
         // if (LastMinute != []) {
         //     console.log('a')
         //     return
+        const lastobject=await Detection.find().sort({_id:-1}).limit(1);
+        console.log(lastobject[0])
+        var splice1=lastobject[0].createdAt
+        
+        console.log(typeof(splice1))
+        splice1 = JSON.stringify(splice1);
+        splice1=splice1.substring(12,17)
+        let date_time = new Date();
+        date_time = JSON.stringify(date_time);
+        date_time=date_time.substring(12,17)
+        let last_record_min=splice1.substring(3,5)
+        let present_minute=date_time.substring(3,5)
+        if(last_record_min==present_minute){
+            return res.send({"msg":"only one record can store in the single minute"})
+        }
+        console.log(last_record_min)
+        console.log(present_minute)
+        console.log(date_time)
+
+
+        console.log(splice1)
+        if(lastobject[0].Anomaly_Name==req.body.label && lastobject[0].Traceback_Video==req.body.link && lastobject[0].Detection_Video==req.body.detection)
+        return res.send({"msg":"record already stored"})
 
         // }
-        let lastRecord = await Detection.find().sort({ _id: -1 }).limit(1);
-        let date_time = new Date();
+        // let lastRecord = await Detection.find().sort({ _id: -1 }).limit(1);
+        
         // let lastDetectedTime = lastRecord[0].Anomaly_Date;
         // let split = lastDetectedTime.split(':')
         // let splitHour = split[0];
@@ -490,133 +534,135 @@ module.exports = {
         //     return res.status(422).json({ message: 'record can only be saved after 1 minure' })
         // else {
 
-            // console.log(splitHour)
-            // console.log(splitMinute)
+        // console.log(splitHour)
+        // console.log(splitMinute)
 
-            const { link, label, detection } = req.body
-            console.log(link)
-            console.log(label)
-            console.log(detection)
-            if (!link || !label || !detection)
-                return
-            console.log('inside live')
+        const { link, label, detection } = req.body
+        console.log(link)
+        console.log(label)
+        console.log(detection)
+        if (!link || !label || !detection)
+            return
+        console.log('inside live')
 
-            const latitude = 33.6518
-            const longitude = 73.1566
-            let Anomaly_Name = label
-            let Traceback_Video = link
-            let Detection_Video = detection
-            var Anomaly_ID = await Detection.count({})
-            Anomaly_ID = Anomaly_ID + 1;
-            // get current date
-            // adjust 0 before single digit date
-            let date = ("0" + date_time.getDate()).slice(-2);
+        const latitude = 33.6518
+        const longitude = 73.1566
+        let Anomaly_Name = label
+        let Traceback_Video = link
+        let Detection_Video = detection
+        var Anomaly_ID = await Detection.count({})
+        Anomaly_ID = Anomaly_ID + 1;
+        // get current date
+        // adjust 0 before single digit date
+        // let date = ("0" + date_time.getDate()).slice(-2);
 
-            // get current month
-            let month = ("0" + (date_time.getMonth() + 1)).slice(-2);
+        // get current month
+        // let month = ("0" + (date_time.getMonth() + 1)).slice(-2);
 
-            // get current year
-            let year = date_time.getFullYear();
+        // get current year
+        // let year = date_time.getFullYear();
 
-            // get current hours
-            let hours = date_time.getHours();
+        // get current hours
+        // let hours = date_time.getHours();
 
-            // get current minutes
-            let minutes = date_time.getMinutes();
+        // get current minutes
+        // let minutes = date_time.getMinutes();
 
-            // get current seconds
-            let seconds = date_time.getSeconds();
+        // get current seconds
+        // let seconds = date_time.getSeconds();
 
-            // prints date in YYYY-MM-DD format
+        // prints date in YYYY-MM-DD format
 
-            let Anomaly_Time
-            if (hours <= 11)
-                Anomaly_Time = hours + ":" + minutes + "AM";
-            else
-                Anomaly_Time = hours + ":" + minutes + "PM";
+        // let Anomaly_Time
+        // if (hours <= 11)
+        //     Anomaly_Time = hours + ":" + minutes + "AM";
+        // else
+        //     Anomaly_Time = hours + ":" + minutes + "PM";
 
 
-            // const Anomaly_Date = year + "-" + month + "-" + date;
-            const Anomaly_Date = new Date()
-            const fetch = (...args) => import('node-fetch').then(({ default: fetch }) =>
-                fetch(...args));
+        // const Anomaly_Date = year + "-" + month + "-" + date;
+        const Anomaly_Date = new Date()
+        const fetch = (...args) => import('node-fetch').then(({ default: fetch }) =>
+            fetch(...args));
 
-            var Anomaly_Area = 'Electrical Engineering Department, Islamabad, Pakistan'
+        let Anomaly_Area = 'Electrical Engineering Department, Islamabad, Pakistan'
 
-            try {
-                const apiResponse = await fetch(
-                    `http://api.positionstack.com/v1/reverse?access_key=a2a6d7cce8110ca44006b2249e5a48bc&query=${latitude},${longitude}`
-                )
-                var apiResponseJson = await apiResponse.json()
-                if (apiResponseJson) {
-                    Anomaly_Area = apiResponseJson.data[1].label;
-                }
+        try {
+            const apiResponse = await fetch(
+                `http://api.positionstack.com/v1/reverse?access_key=a2a6d7cce8110ca44006b2249e5a48bc&query=${latitude},${longitude}`
+            )
+            var apiResponseJson = await apiResponse.json()
+            if (apiResponseJson) {
+                Anomaly_Area = apiResponseJson.data[1].label;
             }
-            catch (error) {
-                console.log(error)
+        }
+        catch (error) {
+            console.log(error)
+        }
+        const Detect = new Detection({ Anomaly_ID, Anomaly_Name, Anomaly_Date, Anomaly_Area, Traceback_Video, Detection_Video })
+        const save = await Detect.save()
+        
+        console.log('detect save')
+        var twilio = require("twilio");
+        const accountSid = process.env.new_ACCOUNT_SID
+        const authToken = process.env.new_AUTH_TOKEN
+        var client = new twilio(accountSid, authToken);
+        try {
+            const apiResponse = await fetch(
+                `http://api.positionstack.com/v1/reverse?access_key=a2a6d7cce8110ca44006b2249e5a48bc&query=${latitude},${longitude}`
+            )
+            console.log('detect save2')
+            var apiResponseJson = await apiResponse.json()
+            const Notification_Name = label;
+            const Notification_Receiver = 'Admin';
+            var Notification_ID = await Notification.count({})
+            Notification_ID = Notification_ID + 1;
+
+            const Notification_Date = new Date();
+
+            let Notification_Area = 'Electrical Engineering Department, Islamabad, Pakistan'
+            if (apiResponseJson) {
+                Notification_Area = apiResponseJson.data[1].label;
             }
-            const Detect = new Detection({ Anomaly_ID, Anomaly_Name, Anomaly_Date, Anomaly_Area, Traceback_Video, Detection_Video })
-            const save = await Detect.save()
+            const Notify = new Notification({ Notification_ID, Notification_Name, Notification_Receiver, Notification_Date, Notification_Area })
 
-            var twilio = require("twilio");
-            const accountSid = process.env.new_ACCOUNT_SID            
-            const authToken = process.env.new_AUTH_TOKEN
-            var client = new twilio(accountSid, authToken);
-            try {
-                const apiResponse = await fetch(
-                    `http://api.positionstack.com/v1/reverse?access_key=a2a6d7cce8110ca44006b2249e5a48bc&query=${latitude},${longitude}`
-                )
-                var apiResponseJson = await apiResponse.json()
-                const Notification_Name = label;
-                const Notification_Receiver = 'Admin';
-                var Notification_ID = await Notification.count({})
-                Notification_ID = Notification_ID + 1;
+            await Notify.save()
+            console.log('a')
+            if (apiResponseJson) {
+                let location = apiResponseJson.data[1].label;
+                // body: label + " Detected At " + location,
 
-                const Notification_Date = new Date();
+                client.messages
+                    .create({
+                        body: label + " Detected At " + location,
+                        from: +17209034841,
+                        to: +923010511797,
+                    })
+                    .then((message) => {
 
-                let Notification_Area = 'Electrical Engineering Department, Islamabad, Pakistan'
-                if (apiResponseJson) {
-                    Notification_Area = apiResponseJson.data[1].label;
-                }
-                const Notify = new Notification({ Notification_ID, Notification_Name, Notification_Receiver, Notification_Date, Notification_Area })
+                        console.log("sent succesfully")
 
-                await Notify.save()
-                console.log('a')
-                if (apiResponseJson) {
-                    let location = apiResponseJson.data[1].label;
-                    // body: label + " Detected At " + location,
-                            
-                    client.messages
-                        .create({
-                            body:'adf',
-                            from: +15134504449,
-                            to: +923010511797,
-                        })
-                        .then((message) => {
+                        res.status(200).send(message)
 
-                            console.log("sent succesfully")
-                            
-                            res.status(200).send(message)
+                    }).catch((err) => {
 
-                        }).catch((err) => {
+                        console.error("phone : ", err.message);
 
-                            console.error("phone : ", err.message);
+                        res.send({ error: err.message });
 
-                            res.send({ error: err.message });
+                    });
 
-                        });
-
-
-                }
-                else {
-                    console.log('something went wrong')
-                    return res.json({ error: err.message });
-                }
 
             }
-            catch (err) {
-                console.log(err)
-                res.status(500).send('Something went wrong')
+            else {
+                console.log('something went wrong')
+                return res.json({ error: err.message });
+            }
+
+        }
+        catch (err) {
+            console.log(err)
+            res.status(500).send('Something went wrong')
         }
 
     },
@@ -666,36 +712,30 @@ module.exports = {
             // const t=await Detection.find({timestamp:{$gt: new Date(ISODate("2022-12-03T10:34:51.078+00:00")-60*60000)}})
             var lastHour = new Date();
             lastHour.setHours(lastHour.getHours() - 1);
+            // Detection.aggregate([
 
-            // const t=await Anomaly_Date.aggregate(
-            //     { $match: { "createdAt": { $gt: lastHour }, } },
-            //     { $project: { "createdAt": 1, "createdAt_Minutes": { $minute: "$createdAt" }, "tweets": 1, } },
-            //     { $group: { "_id": "$createdAt_Minutes", "sum_tweets": { $sum: "$tweets" } } }
-            // )
-            Detection.aggregate([
+            //     {
+            //         $group: {
+            //             _id: { $dateToString: { format: "%M", date: "$createdAt" } },
+            //             Totaluser: { $sum: 1 }
+            //         }
+            //     },
+            // ],
 
-                {
-                    $group: {
-                        _id: { $dateToString: { format: "%M", date: "$createdAt" } },
-                        Totaluser: { $sum: 1 }
-                    }
-                },
-            ],
+            //     function (err, result) {
+            //         let count = 0
+            //         if (err) {
+            //             res.send(err);
+            //         } else {
 
-                function (err, result) {
-                    let count = 0
-                    if (err) {
-                        res.send(err);
-                    } else {
+            //             console.log(result.map((ar) => {
+            //                 count += 1;
+            //             }))
 
-                        console.log(result.map((ar) => {
-                            count += 1;
-                        }))
-
-                        res.json(count);
-                    }
-                }
-            );
+            //             res.json(count);
+            //         }
+            //     }
+            // );
             // res.status(200).json(result);
 
             // console.log(new Date().getTime())
@@ -705,14 +745,14 @@ module.exports = {
             const Last_One_Year_Detection = await Detection.count({ "timestamps": { $lt: new Date(), $gte: new Date(new Date().setDate(new Date().getTime() - (60 * 60 * 1000 * 24 * 365))) } })
             const Last_One_Month_Detection1 = await Detection.count({ "timestamps": { $lt: new Date(), $gte: new Date(new Date().setDate(new Date().getTime() - (60 * 60 * 1000 * 24 * 30))) } })
             const TotalDetection = await Detection.count({})
-            const Pistol = await Detection.count({ Anomaly_Name: 'Pistol' });//Gun
-            const Fire = await Detection.count({ Anomaly_Name: 'Fire' });
-            const Accident = await Detection.count({ Anomaly_Name: 'Accident' });//car-crash
-            const Knife = await Detection.count({ Anomaly_Name: 'Knife' });
-            const Smoke = await Detection.count({ Anomaly_Name: 'Smoke' });
-            const Fight = await Detection.count({ Anomaly_Name: 'Fight' });
-            return
-            // return res.status(200).json({ Last_One_Hour_Detection, Last_One_Day_Detection, Last_One_Week_Detection, Last_One_Month_Detection, Last_One_Year_Detection, TotalDetection, Pistol, Fire, Accident, Knife, Fight, Smoke })
+            const Pistol = await Detection.count({ Anomaly_Name: 'gun' });//Gun
+            const Fire = await Detection.count({ Anomaly_Name: 'fire' });
+            const Accident = await Detection.count({ Anomaly_Name: 'car-crash' });//car-crash
+            const Knife = await Detection.count({ Anomaly_Name: 'knife' });
+            const Smoke = await Detection.count({ Anomaly_Name: 'smoke' });
+            const Fight = await Detection.count({ Anomaly_Name: 'fight' });
+
+            return res.status(200).json({ Last_One_Hour_Detection, Last_One_Day_Detection, Last_One_Week_Detection, Last_One_Month_Detection, Last_One_Year_Detection, TotalDetection, Pistol, Fire, Accident, Knife, Fight, Smoke })
             // return res.status(200).json({ Fight })
         }
         catch (error) {
@@ -738,6 +778,133 @@ module.exports = {
             console.log(error)
             return res.status(404).json({ message: 'Something went wrong' })
         }
-    }
+    },
+    SearchNotificationLog: async (req, res) => {
+        console.log(req.params.id)
+        const n = await Notification.find({ _id: req.params.id })
+        console.log(n)
 
+        await Notification.find({ _id: req.params.id }).then((notificationFind) => {
+            console.log('ad')
+            console.log(notificationFind)
+            return res.status(200).send(notificationFind)
+        }).catch((err) => {
+            return res.send(err)
+        })
+
+        // console.log(notificationFind)
+
+
+    },
+    SendOTP: async (req, res) => {
+        try {
+            const email = req.body.email;
+            const find = await Admin.findOne({ email: email });
+            if (find) {
+                console.log('find')
+                const otp = Math.floor(1000 + Math.random() * 9999);
+
+
+                let transporter = nodemailer.createTransport({
+                    // host: "smtp.ethereal.email",
+                    // port: 587,
+                    // secure: false, // true for 465, false for other ports
+                    method: 'POST',
+                    service: 'gmail',
+                    auth: {
+                        user: 'aamirsatti507@gmail.com', // generated ethereal user
+                        pass: 'epraoexvkqhntdni', // generated ethereal password
+                    },
+                });
+                console.log('line 775')
+
+                var mailOptions = {
+                    from: 'aamirsatti507@gmail.com ',
+                    to: email,// who recieve email
+                    subject: 'Forget Password OTP',
+                    html: `<h1>OTP</h1><br></br>Email: ${otp}`
+                };
+                console.log('line 783')
+                transporter.sendMail(mailOptions, function (error, info) {
+                    var result = info;
+                    if (info) {
+                        console.log(info.response)
+
+                    }
+
+                    else {
+                        console.log(error)
+
+                        res.send(error)
+                    }
+                });
+                console.log('line 798')
+                if (result) {
+                    console.log('line 800')
+
+                    const addOTP = new OTP({
+                        User_Email: email,
+                        OTP: otp
+                    })
+                    const save = await addOTP.save();
+
+                    return res.status(200).send(addOTP)
+                }
+            }
+            else {
+
+                return res.send({ "msg": "Invalid Email" });
+            }
+
+        }
+        catch (error) {
+            res.send({ "msg": "Something Went Wrong Try Again" })
+        }
+    },
+
+    VerifyOTP: async (req, res) => {
+        try {
+            const { email, otp } = req.body;
+
+            console.log(req.body)
+            console.log(email)
+            console.log(otp)
+            const verify = await OTP.findOne({ User_Email: email, OTP: otp });
+            console.log('v ', verify)
+            if (verify) {
+                const save = await OTP.findOneAndRemove({ User_Email: email, OTP: otp });
+                console.log(save)
+                return res.send({ "msg": "ok" });
+            }
+            else {
+                return res.send({ "msg": "Invalid" });
+            }
+
+        }
+        catch (error) {
+            res.send({ "msg": "Something Went Wrong Try Again" })
+        }
+    },
+    ForgetPassword: async (req, res) => {
+        try {
+            const { password } = req.body;
+
+            const password1 = await bcrypt.hash(password, 12);
+            Admin.update({ password: password1 }, { new: true }).
+                then((results) => {
+                    if (results == null) {
+                        throw new Error("not Found")
+                    }
+                    console.log("Password Matches")
+                    return res.send({ message: "Password Changed" });
+                }).catch((err) => {
+                    console.log(err)
+                    return res.json({ message: "Something Went Wrong Try Again" })
+                })
+        }
+
+        catch (error) {
+            res.send({ "msg": "Something Went Wrong Try Again" })
+        }
+    }
 }

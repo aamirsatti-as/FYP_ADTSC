@@ -14,7 +14,10 @@ import {
   Container,
   Row,
   Col,
+  Table
 } from "react-bootstrap";
+
+
 
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -23,10 +26,13 @@ function Notifications() {
   const notificationAlertRef = React.useRef(null);
   const [result, setResult] = useState([]);
   const [modal, setModal] = useState();
-  const [notificationLog,setNotificationLog]=useState([]);
+  const [notificationLog, setNotificationLog] = useState(null);
+  const [check, setCheck] = useState(true);
 
 
   const deleteNotification = async (d_id) => {
+    setCheck(false)
+
     const res = await fetch("http://localhost:5000/deleteNotification", {
       method: "Delete",
       headers: {
@@ -49,27 +55,37 @@ function Notifications() {
   }
 
   const fetchData = async () => {
-
+    // let del=await axios.delete('http://localhost:5000/deleteNotification');
+    
     let result = await fetch("http://localhost:5000/getNotification");
     result = await result.json();
-    console.log(result.Last_24Hour_Notification)
+    console.log(result)
     if (result.status == 404) {
       const newArray = {}
       setResult(newArray)
       return
     }
     else {
-      console.log(result.status)
-      setResult(result.Last_24Hour_Notification);
+      // console.log(result.status)
+      setResult(result.notification);
     }
   };
 
-  const NotificatoinLog= async(id)=>{
-    setNotificationLog(result.filter((item) => {
-      console.log('re ',id,"  it ",item._id)
-      return item._id==id
-  }))
-  console.log(notificationLog)
+  const NotificatoinLog = async (id) => {
+    // setNotificationLog(result.filter((item) => {
+    //   console.log('_id ',item._id, "id ",id)
+    //   return item._id === id
+    // }))
+
+    axios.get("http://localhost:5000/searchNotificationLog/" + id).then((response) => {
+      console.log(response.data[0])
+      setNotificationLog(response.data[0])
+      console.log(notificationLog.Notification_Name)
+
+    }).catch((err) => {
+      console.log(err)
+
+    })
   }
   useEffect(() => {
     fetchData()
@@ -97,7 +113,29 @@ function Notifications() {
                 <Card.Body >
                   <Row>
                     <Col md="12">
-                      <Alert className="alert-with-icon" variant="info">
+                      <Alert className="alert-with-icon" variant="info" onClick={() => {
+                        console.log(check)
+                        if(check==false){
+                          setCheck(true)
+                          console.log(check)
+                          return
+                        }
+                        NotificatoinLog(result._id)
+                        setModal(true)
+                        // {console.log(notificationLog)}
+                        console.log(check)
+                        // if(check==true){
+                        //   console.log(check)
+                        //   setModal(true)
+                        // }
+                        // else{
+                        //   check=true
+                        // }
+                        // console.log(notificationLog.length)
+                        // {notificationLog==null?setModal(false):setModal(true)}
+
+
+                      }}>
                         <button
                           aria-hidden={true}
                           className="close"
@@ -125,25 +163,13 @@ function Notifications() {
 
 
                       </Alert>
-                      <button className="btn btn-dark"
-                          style={{
-                            // backgroundColor: '#eb0c21',
-                            borderRadius: "20px",
-                            color: '#FFFFFF',
-                            float:'right'
-                          }}
-                          onClick={() => {
+                      {/* onClick={() => {
                                   NotificatoinLog(result._id)
                                   if(notificationLog)
                                   setModal(true)
 
-                                }}>
-                        
-                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-eye-fill" viewBox="0 0 16 16">
-                            <path d="M10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0z" />
-                            <path d="M0 8s3-5.5 8-5.5S16 8 16 8s-3 5.5-8 5.5S0 8 0 8zm8 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z" />
-                          </svg>
-                        </button>
+                                }}> */}
+
 
 
                     </Col>
@@ -155,31 +181,85 @@ function Notifications() {
 
         </Card>
       </Container>
-      <Modal
-                        size="md"
-                        isOpen={modal}
-                        // className='modelNot'
-                        aria-labelledby='contained-modal-title-vcenter'
-                        centered
-                        toggle={() => setModal(!modal)}>
-                        <ModalHeader
-                            toggle={() => setModal(!modal)}>
-                            <h4 className="cardTitle" style={{color:'#fff'}}>Update Notifier</h4>
 
-                        </ModalHeader>
-                        <ModalBody>
+      {
 
-                            {/* <form > */}
-                            <Row>
+        notificationLog == null ? (
+          <h1></h1>
+        ) : (
+          <div className="modaldiv">
+          <Modal
+          className="modal-lg"
+            size="md"
+            isOpen={modal}
+            // className='modelNot'
+            width='100%'
+            aria-labelledby='contained-modal-title-vcenter'
+            centered
+            toggle={() => setModal(!modal)}>
+            <ModalHeader
+              className='modelNot'
+              toggle={() => setModal(!modal)}>
+              <h2 className="cardTitle" style={{ color: '#000' }}>Notification Log</h2>
 
-                                <Col className="px-1" md='12'>
-                                  <h1>hello</h1>
+            </ModalHeader>
+            <ModalBody
+              className='modelNot'>
 
-                                    
-                                </Col>
-                            </Row>
-                        </ModalBody>
-                    </Modal>
+              {/* <form > */}
+              <Row>
+
+                <Col className="px-1" md='12'>
+
+                  <Table className="table-hover  table-fixed  table-bordered
+                table-sm same-col-widths">
+                    <thead>
+                      <tr className="tableRow">
+                        <th className="border-1">Anomaly Name</th>
+                        <td>{notificationLog.Notification_Name}</td>
+                      </tr>
+                      <tr className="tableRow">
+                        <th className="border-7">Anomaly Area</th>
+                        <td>{notificationLog.Notification_Area}</td>
+                      </tr>
+
+                      <tr className="tableRow">
+                        <th className="border-7">Anomaly Date</th>
+                        <td>{notificationLog.Notification_Date}</td>
+                      </tr>
+
+                      <tr className="tableRow">
+                        <th className="border-1">Notification Send To</th>
+                        <td>{notificationLog.Notification_Receiver}</td>
+                      </tr>
+
+
+                    </thead>
+                    <button className="btn btn-dark"
+
+                      
+                       onClick={() => {
+                       setModal(false)                   }
+                  }
+                      style={{
+                        // backgroundColor: '#eb0c21',
+                        marginTop: '8%',
+                        marginBottom: '8%',
+                        borderRadius: "20px",
+                        color: '#FFFFFF',
+                        float: 'right'
+                      }}
+                    >
+                      Close
+                    </button>
+                  </Table>
+
+                </Col>
+              </Row>
+            </ModalBody>
+          </Modal>
+          </div>
+        )}
 
       <ToastContainer
         position="top-center"

@@ -6,9 +6,7 @@ const control = require('../controllers/adminControllers.js')
 router.get('/', function(req, res, next) {
     res.send('Hello from Profile');
 });
-
 router.post('/login',control.login)
-
 router.put('/changePassword',control.changePassword)
 router.post('/updateUser',control.UpdateUser)
 router.get('/getAdmin',control.getAdmin)
@@ -29,4 +27,10 @@ router.post('/getUpdateNotifier',control.GetUpdateNotifier)
 router.put('/updateNotifier',control.UpdateNotifier)
 router.get('/allDetectionChart',control.AllDetectionChart)
 router.delete('/deleteNotification24hours',control.DeleteNotificationAfter24Hour)
+router.get('/searchNotificationLog/:id',control.SearchNotificationLog)
+router.post('/sendOTP',control.SendOTP)
+router.post('/verifyOTP',control.VerifyOTP)
+router.put('/forgetPassword',control.ForgetPassword)
+
+
 module.exports = router;

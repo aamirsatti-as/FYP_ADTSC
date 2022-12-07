@@ -27,3 +27,11 @@ Button{
     width: 30%;
     float: right;
 }
+.modelNot{
+    background-color: #fff;
+    border-right: #fff;
+}
+
+.modaldiv{
+    width: 140%;
+}

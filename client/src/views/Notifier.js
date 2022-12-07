@@ -173,6 +173,7 @@ function Notifier() {
             console.log(res.data)
             toast(res.data.message) 
             fetchData()
+            setModal(false)
 
         }
     }
@@ -407,6 +408,7 @@ function Notifier() {
                 searchItem === null ? (
                     <h1></h1>
                 ) : (
+                    <div className="modaldiv">
                     <Modal
                         size="md"
                         isOpen={modal}
@@ -416,10 +418,11 @@ function Notifier() {
                         toggle={() => setModal(!modal)}>
                         <ModalHeader
                             toggle={() => setModal(!modal)}>
-                            <h4 className="cardTitle" style={{color:'#fff'}}>Update Notifier</h4>
+                            <h4 className="cardTitle" style={{color:'#000'}}>Update Notifier</h4>
 
                         </ModalHeader>
-                        <ModalBody>
+                        <ModalBody 
+              className='modelNot'>
 
                             {/* <form > */}
                             <Row>
@@ -522,6 +525,7 @@ function Notifier() {
                             </Row>
                         </ModalBody>
                     </Modal>
+                    </div>
                 )
             }
 

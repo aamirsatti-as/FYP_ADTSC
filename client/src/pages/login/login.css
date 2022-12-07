@@ -6830,7 +6830,7 @@ a.close.disabled {
 
     .modal-lg,
     .modal-xl {
-        max-width: 800px;
+        max-width: 600px;
     }
 }
 
@@ -12006,4 +12006,11 @@ h5,
     border: 1px solid transparent;
     background: #e3b04b;
     color: #fff;
+}
+.modelNot{
+    background-color: #fff;
+    border-right: #fff;
+}
+.table_heading{
+    width: 50%;
 }
