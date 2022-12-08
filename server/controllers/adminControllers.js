@@ -635,8 +635,8 @@ module.exports = {
                 client.messages
                     .create({
                         body: label + " Detected At " + location,
-                        from: +17209034841,
-                        to: +923010511797,
+                        from: process.env.FROM,
+                        to: process.env.TO,
                     })
                     .then((message) => {
 
