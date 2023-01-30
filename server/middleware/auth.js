@@ -4,9 +4,7 @@ const secret = 'IAmGeneratingTokenToAuthticateCredintialBelongToUser';
 const auth = async (req, res, next) => {
   try {
     console.log(req.headers.authorization)
-    return
     const token = req.headers.authorization.split(" ")[1];
-    // const isCustomAuth = token.length < 500;
 
     let decodedData;
     console.log('1')

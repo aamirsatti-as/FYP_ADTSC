@@ -11,7 +11,5 @@ var OTPSchema = new schema({
         type: String,
         required: true,
     },
-    
-
 });
 module.exports = mongoose.model('OTP', OTPSchema);

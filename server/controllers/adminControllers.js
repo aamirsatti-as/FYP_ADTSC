@@ -29,7 +29,7 @@ const Nexmo = require('nexmo');
 module.exports = {
 
     login: async (req, res) => {
-        console.log('ad')
+        console.log('inside Login')
 
         const { email, password } = req.body;
 
@@ -248,28 +248,28 @@ module.exports = {
         return res.status(201).send(save);
 
     },
-    DeleteNotification: async (Req, res) => {
-        try {
-            console.log('a')
-            let Last_Hour = await Notification.find({ "Notification_Date": { $lt: new Date(), $gt: new Date(new Date().getTime() - (60 * 60 * 1000)) } })
-            console.log(Last_Hour)
-            // var Last_24Hour_Notification1 = await Notification.count({ "Notification_Date": { $lt: new Date(), $gt: new Date(new Date().getTime() - (60 * 60 * 1000 * 24)) } })
-            // let Last_24Hour_Notification = await Notification.find({ "timestamp": { $lt: new Date(), $gt: new Date(new Date().getTime() - (60 * 60 * 1000 * 24)) } })
-            const delAll = await Notification.deleteMany({})
+    // DeleteNotification: async (Req, res) => {
+    //     try {
+    //         console.log('a')
+    //         let Last_Hour = await Notification.find({ "Notification_Date": { $lt: new Date(), $gt: new Date(new Date().getTime() - (60 * 60 * 1000)) } })
+    //         console.log(Last_Hour)
+    //         // var Last_24Hour_Notification1 = await Notification.count({ "Notification_Date": { $lt: new Date(), $gt: new Date(new Date().getTime() - (60 * 60 * 1000 * 24)) } })
+    //         // let Last_24Hour_Notification = await Notification.find({ "timestamp": { $lt: new Date(), $gt: new Date(new Date().getTime() - (60 * 60 * 1000 * 24)) } })
+    //         const delAll = await Notification.deleteMany({})
             
-            Last_Hour.map(async (row) => {
-                const Notify = new Notification({ Notification_ID: row.Notification_ID, Notification_Name: row.Notification_Name, Notification_Receiver: row.Notification_Receiver, Notification_Date: row.Notification_Date, Notification_Area: row.Notification_Area })
-                // const data = await Notifiers.findByIdAndUpdate({ _id: row._id }, { Email: Email, FirstName: FirstName, LastName: LastName, Phone: Phone, UserName: UserName }, { new: true });
+    //         Last_Hour.map(async (row) => {
+    //             const Notify = new Notification({ Notification_ID: row.Notification_ID, Notification_Name: row.Notification_Name, Notification_Receiver: row.Notification_Receiver, Notification_Date: row.Notification_Date, Notification_Area: row.Notification_Area })
+    //             // const data = await Notifiers.findByIdAndUpdate({ _id: row._id }, { Email: Email, FirstName: FirstName, LastName: LastName, Phone: Phone, UserName: UserName }, { new: true });
 
-                var save = await Notify.save()
-            })
-            res.json({"msg":"ok"})
-        }
-        catch (error) {
-            console.log(error)
-            return res.json({ message: 'Something went wrong' })
-        }
-    },
+    //             var save = await Notify.save()
+    //         })
+    //         res.json({"msg":"ok"})
+    //     }
+    //     catch (error) {
+    //         console.log(error)
+    //         return res.json({ message: 'Something went wrong' })
+    //     }
+    // },
     GetNotification: async (req, res) => {
         
         let notification = await Notification.find();
@@ -303,20 +303,20 @@ module.exports = {
         //     return res.status(404).json({ message: 'Something went wrong' })
         // }
     },
-    // DeleteNotification: async (req, res) => {
-    //     const { d_id } = req.body;
-    //     try {
-    //         const data = await Notification.deleteOne({ _id: d_id });
-    //         if (data) {
-    //             return res.status(200).json({ message: "Record Deleted Successfully" });
-    //         }
-    //         else {
-    //             return res.status(422).json({ error: "Try Again" });
-    //         }
-    //     } catch (err) {
-    //         console.log(err);
-    //     }
-    // },
+    DeleteNotification: async (req, res) => {
+        const { d_id } = req.body;
+        try {
+            const data = await Notification.deleteOne({ _id: d_id });
+            if (data) {
+                return res.status(200).json({ message: "Record Deleted Successfully" });
+            }
+            else {
+                return res.status(422).json({ error: "Try Again" });
+            }
+        } catch (err) {
+            console.log(err);
+        }
+    },
     DeleteDetection: async (req, res) => {
 
         const { d_id } = req.body;
@@ -552,6 +552,7 @@ module.exports = {
         let Detection_Video = detection
         var Anomaly_ID = await Detection.count({})
         Anomaly_ID = Anomaly_ID + 1;
+        
         // get current date
         // adjust 0 before single digit date
         // let date = ("0" + date_time.getDate()).slice(-2);
@@ -659,6 +660,36 @@ module.exports = {
                 return res.json({ error: err.message });
             }
 
+            // try{
+            //     const nexmo = new Nexmo({
+            //         // apiKey: 'b7956298',
+            //         // apiSecret: 'NQJ41okXs2u9Ay5u'
+            //         // apiKey:'bddf8f85',
+            //         // apiSecret:'qsIwFo8eOHRIeP3K'
+            //         apiKey:'b7956298',
+            //         apiSecret:'NQJ41okXs2u9Ay5u'
+            //       }, { debug: true });
+            //     const from = "Vonage APIs"
+            //     const to = "+923185021068"
+            //     let location='Electrical Engineering Department, Islamabad, Pakistan'
+            //     const text =  label + " Detected At " + location;
+                
+            //     nexmo.message.sendSms(from, to, text, (err, responseData) => {
+            //         if (err) {
+            //             console.log(err);
+            //         } else {
+            //             if(responseData.messages[0]['status'] === "0") {
+            //                 console.log("Message sent successfully.");
+            //             } else {
+            //                 console.log(`Message failed with error: ${responseData.messages[0]['error-text']}`);
+            //             }
+            //         }
+            //     })
+            // }
+            // catch(error){
+            //     console.log(error)
+            // }
+
         }
         catch (err) {
             console.log(err)
@@ -705,7 +736,8 @@ module.exports = {
     },
     AllDetectionChart: async (req, res) => {
         try {
-            const Last_One_Hour_Detection = await Detection.count({ "timestamps": { $lt: new Date(), $gt: new Date(new Date().getTime() - (60 * 60 * 1000)) } })
+            // let Last_Hour = await Notification.find({ "Notification_Date": { $lt: new Date(), $gt: new Date(new Date().getTime() - (60 * 60 * 1000)) } })
+            const Last_One_Hour_Detection = await Detection.count({ "createdAt": { $lt: new Date(), $gt: new Date(new Date().getTime() - (60 * 60 * 1000)) } })
             // const Last_One_Day_Detection=await Detection.count({"Anomaly_Date":{$lt: new Date(),$gte: new Date(new Date().setDate(new Date().getDate()-(24*60 * 60 * 1000)))}})
             // const Last_One_Day_Detection = await Detection.count({ "Anomaly_Date": { $lt: new Date(), $gt: new Date(new Date().getTime() - (60 * 60 * 1000 * 24)) } })
             // const t=await Detection.count({ "Anomaly_Date": { $lt: new Date().getTime(), $gte: 400}})

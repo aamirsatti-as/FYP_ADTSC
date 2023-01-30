@@ -127,10 +127,8 @@ const Login = () => {
             else {
                 toast('Invalid Email')
             }
-
         })
     }
-
     const handleSubmitOTP = async (e) => {
         e.preventDefault()
         console.log(OTP)

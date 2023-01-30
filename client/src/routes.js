@@ -55,13 +55,7 @@ const dashboardRoutes = [
     component: Detection,
     layout: "/admin"
   },
-  // {
-  //   path: "/traceback",
-  //   name: "Back Track",
-  //   icon: "nc-icon nc-paper-2",
-  //   component: Traceback,
-  //   layout: "/admin"
-  // },
+
   {
     path: "/icons",
     name: "Live Footage ",

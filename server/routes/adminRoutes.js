@@ -3,9 +3,13 @@ var router = express.Router();
 // const authenticate = require('../middleware/auth.js')
 const control = require('../controllers/adminControllers.js')
 
-router.get('/', function(req, res, next) {
+router.get('/', function(req, res,next) {
     res.send('Hello from Profile');
 });
+// router.get('/aa', function(req, res) {
+//     res.send('Hello from Profile22');
+// });
+// console.log('a')
 router.post('/login',control.login)
 router.put('/changePassword',control.changePassword)
 router.post('/updateUser',control.UpdateUser)

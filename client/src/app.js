@@ -49,16 +49,12 @@ const navigate=useNavigate()
     return (
       <div>
         <UserContext.Provider value={{ user, setUser }}>
-  
           <Routes>
-  
             {/* <Redirect from="/" to="/admin/dashboard" /> */}
             {/* <Route exact path="/" element={<Login />} /> */}
             {/* <Route  render={(props) => <AdminLayout {...props} />} /> */}
             {/* <Route path="/f" element={AdminLayout} /> */}
             {/* <Route path="/admin" element={<AdminLayout ></AdminLayout>} /> */}
-  
-  
             {/* <Route exact path="/invoices" element={
           <>
             <h1>Heloo i am invoices </h1>
@@ -76,7 +72,7 @@ const navigate=useNavigate()
               
               <Route path="user" element={<UserProfile />} />
               <Route path="detection" element={<Detection />} />
-  
+
               <Route path="traceback" element={< h1>This is Typography</h1>} />
               <Route path="icons" element={<Livefootage />} />
               <Route path="notifiers" element={<Notifier />} />
@@ -90,11 +86,6 @@ const navigate=useNavigate()
         </UserContext.Provider>
       </div>
   )
-  }
-
-
-  
+  } 
 }
-
-
 export default app

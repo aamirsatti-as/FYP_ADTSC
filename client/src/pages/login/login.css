@@ -6706,7 +6706,7 @@ a.close.disabled {
     -webkit-box-direction: normal;
     -ms-flex-direction: column;
     flex-direction: column;
-    width: 100%;
+    width: 190%;
     pointer-events: auto;
     background-color: #000;
     background-clip: padding-box;
@@ -6714,7 +6714,6 @@ a.close.disabled {
     border-radius: 0.3rem;
     outline: 0;
 }
-
 .modal-backdrop {
     position: fixed;
     top: 0;
