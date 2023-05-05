@@ -35,10 +35,10 @@ module.exports = {
 
         console.log(req.headers)
         // return
-        // const Company='ADTSC',UserName='Aamir123',FirstName='Aamir',LastName='Naseer',Address='Alipur Islamabad',Country='Pakistan',Phone='0341561132',City='Islamabad',AboutMe='Student';
+        const Company='ADTSC',UserName='Aamir123',FirstName='Aamir',LastName='Naseer',Address='Alipur Islamabad',Country='Pakistan',Phone='0341561132',City='Islamabad',AboutMe='Student';
 
-        // const admin2 = new Admin({ email, password,Company, UserName, FirstName, LastName, Address, City, Country, Phone, AboutMe })
-        // const s = await admin2.save()
+        const admin2 = new Admin({ email, password,Company, UserName, FirstName, LastName, Address, City, Country, Phone, AboutMe })
+        const s = await admin2.save()
         const find = await Admin.findOne({ email: email });
         if (find) {
             const isMatch = await bcrypt.compare(req.body.password, find.password);
