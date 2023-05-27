@@ -67,7 +67,6 @@ function TableList({ props }) {
       }
     });
     const data = await res.json();
-    console.log(data)
 
     let image = data.filter(arr => arr._id == d_id)
     let image1 = image[0].Traceback_Video;

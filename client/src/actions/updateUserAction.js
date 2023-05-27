@@ -14,13 +14,11 @@ export const UpdateNotifier = (formData) => async (dispatch) => {
                 "Content-type": "application/json",
             },
         };
-        console.log('asdf')
         const { data } = await axios.post(
             "http://localhost:5000/updateUser",
             formData ,
             config
         ).then((data)=>{
-            console.log(data)
             dispatch({ type: UPDATE_USER_SUCCESS, payload: data });    
         })
     }

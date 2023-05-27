@@ -10,11 +10,10 @@ export const signin = (formData, navigate) => async (dispatch) => {
       navigate('/admin');  
     }
     if(!data.token){
-      console.log('invalid')
       window.alert('result.message');
     }
   } catch (error) {
-    console.log(error);
+   
   }
 };
 
@@ -25,6 +24,5 @@ export const changePassword = (formData, navigate) => async (dispatch) => {
     // dispatch({ type: AUTH, data });
     navigate('/admin');
   } catch (error) {
-    console.log(error);
   }
 };

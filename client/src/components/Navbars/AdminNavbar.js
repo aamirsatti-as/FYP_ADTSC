@@ -33,7 +33,6 @@ function Header() {
   //   let result = await fetch("http://localhost:5000/getAdmin");
   //   result = await result.json();
   //   setResult(result);   
-  //   console.log(result)
 
   // };
 
@@ -56,9 +55,6 @@ function Header() {
   const handlePassword = async (e) => {
     e.preventDefault();
 
-
-    console.log(formData)
-
     const data = await axios.put('http://localhost:5000/changePassword', formData).then((response) => {
       if (response.status == 200) {
         toast('Password Changed Successfully ')
@@ -66,8 +62,6 @@ function Header() {
     }).catch(function (error) {
       if (error.response.status == 422) {
         toast.error('Something Went wrong, Try Again');
-        console.log(error)
-        console.log(error.message)
       }
     })
   }

@@ -1,10 +1,7 @@
 const Admin = require("../models/admin.js")
 const Detection = require('../models/detection.js')
 const Notification = require('../models/notification.js')
-const Test = require('../models/test.js')
 const OTP = require('../models/otp.js')
-// const dotenv=require('dotenv')
-// dotenv.config()
 const dotenv = require('dotenv');
 
 dotenv.config();
@@ -13,10 +10,6 @@ const nodemailer = require("nodemailer");
 const TO_PHONE_NUMBER = process.env.TO_PHONE_NUMBER
 const FROM_PHONE_NUMBER = process.env.FROM_PHONE_NUMBER
 
-// var env=require('')
-
-// console.log(process.env)
-// console.log(process.env.authToken)
 const bcrypt = require('bcryptjs');
 const Notifiers = require('../models/notifier.js')
 const jwt = require('jsonwebtoken')
@@ -29,16 +22,14 @@ const Nexmo = require('nexmo');
 module.exports = {
 
     login: async (req, res) => {
-        console.log('inside Login')
 
         const { email, password } = req.body;
 
-        console.log(req.headers)
         // return
         const Company='ADTSC',UserName='Aamir123',FirstName='Aamir',LastName='Naseer',Address='Alipur Islamabad',Country='Pakistan',Phone='0341561132',City='Islamabad',AboutMe='Student';
 
-        const admin2 = new Admin({ email, password,Company, UserName, FirstName, LastName, Address, City, Country, Phone, AboutMe })
-        const s = await admin2.save()
+        // const admin2 = new Admin({ email, password,Company, UserName, FirstName, LastName, Address, City, Country, Phone, AboutMe })
+        // const s = await admin2.save()
         const find = await Admin.findOne({ email: email });
         if (find) {
             const isMatch = await bcrypt.compare(req.body.password, find.password);
@@ -77,10 +68,8 @@ module.exports = {
                     if (results == null) {
                         throw new Error("not Found")
                     }
-                    console.log("Password Matches")
                     return res.json({ message: "Password Changed" });
                 }).catch((err) => {
-                    console.log(err)
                     return res.status(422).json({ message: "Something Went Wrong Try Again" })
                 })
         }
@@ -92,8 +81,6 @@ module.exports = {
     UpdateUser: async (req, res) => {
         const { Company, UserName, email, FirstName, LastName, Address, City, Country, Phone, AboutMe, Image } = req.body;
         // const Company=req.body.Company;
-        console.log(UserName)
-        console.log('hi')
 
         const admin = await Admin.findOne();
         if (admin) {
@@ -114,6 +101,7 @@ module.exports = {
     },
 
     getAdmin: async (req, res) => {
+        console.log('inside')
         const admin = await Admin.findOne();
         if (admin)
             return res.status(200).send(admin);
@@ -127,7 +115,6 @@ module.exports = {
         var Anomaly_ID = await Detection.count({})
         Anomaly_ID = Anomaly_ID + 1;
 
-        // console.log(Detection.find().count()+1);
         let date_time = new Date();
 
         // get current date
@@ -161,14 +148,12 @@ module.exports = {
                 `http://api.positionstack.com/v1/reverse?access_key=a2a6d7cce8110ca44006b2249e5a48bc&query=${latitude},${longitude}`
             )
             var apiResponseJson = await apiResponse.json()
-            console.log(apiResponseJson)
             if (apiResponseJson) {
                 Anomaly_Area = apiResponseJson.data[1].label;
 
             }
         }
         catch (error) {
-            console.log(error)
         }
 
         // var Anomaly_Date = year + "-" + month + "-" + date;
@@ -195,7 +180,6 @@ module.exports = {
         var Notification_ID = await Notification.count({})
         Notification_ID = Notification_ID + 1;
 
-        // console.log(Detection.find().count()+1);
         // Notification.createIndexes({"Notification_Date":1} , {expireAfterSeconds:60})
         let date_time = new Date();
 
@@ -233,14 +217,12 @@ module.exports = {
                 `http://api.positionstack.com/v1/reverse?access_key=a2a6d7cce8110ca44006b2249e5a48bc&query=${latitude},${longitude}`
             )
             var apiResponseJson = await apiResponse.json()
-            console.log(apiResponseJson)
             if (apiResponseJson) {
                 Notification_Area = apiResponseJson.data[1].label;
 
             }
         }
         catch (error) {
-            console.log(error)
         }
 
         const Notify = new Notification({ Notification_ID, Notification_Name, Notification_Receiver, Notification_Date, Notification_Area })
@@ -248,28 +230,6 @@ module.exports = {
         return res.status(201).send(save);
 
     },
-    // DeleteNotification: async (Req, res) => {
-    //     try {
-    //         console.log('a')
-    //         let Last_Hour = await Notification.find({ "Notification_Date": { $lt: new Date(), $gt: new Date(new Date().getTime() - (60 * 60 * 1000)) } })
-    //         console.log(Last_Hour)
-    //         // var Last_24Hour_Notification1 = await Notification.count({ "Notification_Date": { $lt: new Date(), $gt: new Date(new Date().getTime() - (60 * 60 * 1000 * 24)) } })
-    //         // let Last_24Hour_Notification = await Notification.find({ "timestamp": { $lt: new Date(), $gt: new Date(new Date().getTime() - (60 * 60 * 1000 * 24)) } })
-    //         const delAll = await Notification.deleteMany({})
-            
-    //         Last_Hour.map(async (row) => {
-    //             const Notify = new Notification({ Notification_ID: row.Notification_ID, Notification_Name: row.Notification_Name, Notification_Receiver: row.Notification_Receiver, Notification_Date: row.Notification_Date, Notification_Area: row.Notification_Area })
-    //             // const data = await Notifiers.findByIdAndUpdate({ _id: row._id }, { Email: Email, FirstName: FirstName, LastName: LastName, Phone: Phone, UserName: UserName }, { new: true });
-
-    //             var save = await Notify.save()
-    //         })
-    //         res.json({"msg":"ok"})
-    //     }
-    //     catch (error) {
-    //         console.log(error)
-    //         return res.json({ message: 'Something went wrong' })
-    //     }
-    // },
     GetNotification: async (req, res) => {
         
         let notification = await Notification.find();
@@ -278,30 +238,6 @@ module.exports = {
         else
             res.json({"msg":"something went wrong"})
 
-
-        // try {
-
-        //     var Last_24Hour_Notification1 = await Notification.count({ "Notification_Date": { $lt: new Date(), $gt: new Date(new Date().getTime() - (60 * 60 * 1000 * 24)) } })
-        //     let Last_24Hour_Notification = await Notification.find({ "timestamp": { $lt: new Date(), $gt: new Date(new Date().getTime() - (60 * 60 * 1000 * 24)) } })
-        //     // const delAll = await Notification.deleteMany({})
-        //     // Last_24Hour_Notification.map(async (row) => {
-        //     //     const Notify = new Notification({ Notification_ID: row.Notification_ID, Notification_Name: row.Notification_Name, Notification_Receiver: row.Notification_Receiver, Notification_Date: row.Notification_Date, Notification_Area: row.Notification_Area })
-        //     //     var save = await Notify.save()
-        //     // });
-        //     Last_24Hour_Notification = await Notification.find();
-        //     if (Last_24Hour_Notification)
-        //         return res.status(200).json({ Last_24Hour_Notification })
-        //     else
-        //         return res.status(404).json({ message: 'Something went wrong' })
-        // }
-
-        // catch (error) {
-        //     console.log(error)
-        //     let notification = await Notification.find();
-        //     // if (notification)
-        //     // return res.status(200).json({notification})
-        //     return res.status(404).json({ message: 'Something went wrong' })
-        // }
     },
     DeleteNotification: async (req, res) => {
         const { d_id } = req.body;

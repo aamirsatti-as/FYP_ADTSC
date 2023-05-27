@@ -54,9 +54,7 @@ function Notifier() {
         if (res.status === 200) {
             toast(data.message);
         }
-
         fetchData()
-
     }
 
     if(check){

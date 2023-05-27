@@ -19,15 +19,12 @@ const ChangePassword = () => {
 
 	const handlePassword = (e) => {
 		e.preventDefault();
-		console.log(formData)
 		setFormErrors(validate(formData));
 		setIsSubmit(true);	
 	}
 
 	useEffect(() => {
-		console.log(formErrors);
 		if (Object.keys(formErrors).length === 0 && isSubmit) {
-		  console.log(Object.keys(formErrors));
 		  dispatch(changePassword(formData,navigate)); 
 		}
 	  }, [formErrors]);

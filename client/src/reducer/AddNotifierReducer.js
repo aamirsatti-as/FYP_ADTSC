@@ -9,27 +9,18 @@ import {
 
 
 export const AddNotifierReducer = (state = {userinfo:[]}, action) => {
-  console.log('hi inside')
-  console.log(action.type)
   var isFetching = 0;
    var list=[]
   switch (action.type) {
     case actionType.ADD_NOTIFIER_SUCCESS:
       {
-        // console.log('inside add success')
-        
-        // localStorage.setItem("add", JSON.stringify({ isFetching }));
-        // localStorage.setItem('add2', action.payload);
-        // console.log(action.payload)
         list=action.payload
-        console.log(list+ " asdf")
         return {
           ...state,
           userInfo: action.payload
         };
       }
     case actionType.ADD_NOTIFIER_FAIL: {
-      console.log('inside error')
       return {
         ...state,
         userInfo: action.payload
@@ -37,7 +28,6 @@ export const AddNotifierReducer = (state = {userinfo:[]}, action) => {
     }
     default:
       {
-        console.log('inside default')
         return state;
       }
   }

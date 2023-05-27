@@ -4,7 +4,7 @@ const notification = () => {
 
     useEffect(()=>{
         navigator.geolocation.getCurrentPosition((position)=>{
-            console.log(position)
+            
         })
     },[])
   return (

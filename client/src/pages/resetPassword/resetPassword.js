@@ -12,20 +12,6 @@ const Reset  = ()=>{
             toast({html: "invalid email",classes:"#c62828 red darken-3"})
             return
         }
-        console.log('fetching')
-        // const data = await axios.post('http://localhost:5000/reset-password', formData).then((response)=>{
-        //     if (response.status==200) {
-        //         navigate('/admin/dashboard')
-        //     }
-        //    }).catch(function (error) {
-        //         if (error.response.status==422) {
-        //             toast.error('Something Went wrong, Try Again');
-        //             console.log(error)
-        //             console.log(error.message)
-        //         }
-          
-        //    })
-
         fetch('http://localhost:5000/reset-password',{
             method:"post",
             headers:{
@@ -44,7 +30,6 @@ const Reset  = ()=>{
                navigate('/')
            }
         }).catch((err)=>{
-            console.log(err)
         })
     }
    return (

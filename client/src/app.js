@@ -27,7 +27,6 @@ function app() {
   const [user, setUser] = useState(true);
 const navigate=useNavigate()
   var userExist = localStorage.getItem("profile");
-console.log("userExist",userExist)
   useEffect(()=>{
     document.title="ADTSC"},[])
 

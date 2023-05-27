@@ -203,7 +203,6 @@ function Dashboard() {
     );
 
     res=await res.json();
-    console.log(res)
     setBackendChart(res)
 
   };
@@ -261,19 +260,12 @@ function Dashboard() {
   const submitEditInformation = async (e) => {
 
     e.preventDefault()
-    // setModal(false)
-    // dispatch(UpdateNotifier(modalData, editId));
-    // fetchData()
-
     setModal(false)
-        // const UpdateNotifierState = useSelector((state) => state.updateNotifier);
-        // console.log(UpdateNotifierState,'  jh')
         const UserName=modalData.UserName,Email=modalData.Email,Phone=modalData.Phone,FirstName=modalData.FirstName,LastName=modalData.LastName;
 
         if(editId)
         {
-            const res=await axios.put('http://localhost:5000/updateNotifier',{UserName,Email,Phone,FirstName,LastName,editId})  
-            console.log(res.data)
+            const res=await axios.put('http://localhost:5000/updateNotifier',{UserName,Email,Phone,FirstName,LastName,editId})
             toast(res.data.message) 
             fetchData()
             // setModal(false)

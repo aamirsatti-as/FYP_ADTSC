@@ -22,7 +22,6 @@ export const AddNotifier = (formData) => async (dispatch) => {
             },
         };
 
-        console.log(formData)
 
         const UserName = formData.UserName, Email = formData.Email, FirstName = formData.FirstName, LastName = formData.LastName, Phone = formData.Phone;
         const { data } = await axios.post(
@@ -30,7 +29,6 @@ export const AddNotifier = (formData) => async (dispatch) => {
             formData ,
             config
         );
-        console.log(data)
         // dispatch({ type: actionTypes.ADD_NOTIFIER_SUCCESS, payload: {
         //     Email:data.Email,
         //     isFetching:1
@@ -43,7 +41,6 @@ export const AddNotifier = (formData) => async (dispatch) => {
             type: actionTypes.ADD_NOTIFIER_FAIL,
             payload:{error,isFetching:2}
         });
-        console.log(error)
         
     }
 
@@ -65,7 +62,6 @@ export const UpdateNotifier = (modalData,editId) => async (dispatch) => {
         
         const {data}=await axios.put('http://localhost:5000/updateNotifier',{UserName,Email,Phone,FirstName,LastName,editId},config)
         
-        console.log(data)
 
         dispatch({ type: UPDATE_NOTIFIER_SUCCESS, payload: data });
 
